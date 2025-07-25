@@ -8,7 +8,127 @@
       "latest": "1.0.0",
       "downloads": 0,
       "stars": 0
+    },
+    {
+      "org": "examples",
+      "name": "hello-world",
+      "description": "A simple example tool that demonstrates the basic structure of a Clanker tool",
+      "latest": "1.0.0",
+      "downloads": 0,
+      "stars": 0
+    },
+    {
+      "org": "clanker",
+      "name": "write-to-file",
+      "description": "Write complete content to a file",
+      "latest": "1.0.0",
+      "downloads": 0,
+      "stars": 0
+    },
+    {
+      "org": "clanker",
+      "name": "view-file",
+      "description": "View contents of a file or list directory contents",
+      "latest": "1.0.0",
+      "downloads": 0,
+      "stars": 0
+    },
+    {
+      "org": "clanker",
+      "name": "update-todo-list",
+      "description": "Update existing todos in the todo list",
+      "latest": "1.0.0",
+      "downloads": 0,
+      "stars": 0
+    },
+    {
+      "org": "clanker",
+      "name": "summarize",
+      "description": "Intelligently summarize text content into structured markdown",
+      "latest": "1.0.0",
+      "downloads": 0,
+      "stars": 0
+    },
+    {
+      "org": "clanker",
+      "name": "search",
+      "description": "Search for files containing a pattern using ripgrep",
+      "latest": "1.0.0",
+      "downloads": 0,
+      "stars": 0
+    },
+    {
+      "org": "clanker",
+      "name": "remove",
+      "description": "Delete one or more files with confirmation",
+      "latest": "1.0.0",
+      "downloads": 0,
+      "stars": 0
+    },
+    {
+      "org": "clanker",
+      "name": "read-file",
+      "description": "Read an entire file to prepare for editing",
+      "latest": "1.0.0",
+      "downloads": 0,
+      "stars": 0
+    },
+    {
+      "org": "clanker",
+      "name": "pwd",
+      "description": "Get the current working directory path",
+      "latest": "1.0.0",
+      "downloads": 0,
+      "stars": 0
+    },
+    {
+      "org": "clanker",
+      "name": "multi-edit",
+      "description": "Flexible file editing tool with order-invariant algorithm",
+      "latest": "1.0.0",
+      "downloads": 0,
+      "stars": 0
+    },
+    {
+      "org": "clanker",
+      "name": "list",
+      "description": "List files and directories in a given path",
+      "latest": "1.0.0",
+      "downloads": 0,
+      "stars": 0
+    },
+    {
+      "org": "clanker",
+      "name": "list-todos",
+      "description": "List all current todos in the todo list",
+      "latest": "1.0.0",
+      "downloads": 0,
+      "stars": 0
+    },
+    {
+      "org": "clanker",
+      "name": "input",
+      "description": "Show a platform-specific input dialog to get information from the user",
+      "latest": "1.0.0",
+      "downloads": 0,
+      "stars": 0
+    },
+    {
+      "org": "clanker",
+      "name": "create-todo-list",
+      "description": "Create a new todo list for planning and tracking tasks",
+      "latest": "1.0.0",
+      "downloads": 0,
+      "stars": 0
+    },
+    {
+      "org": "clanker",
+      "name": "bash",
+      "description": "Execute bash commands with timeout and output capture",
+      "latest": "1.0.0",
+      "downloads": 0,
+      "stars": 0
     }
   ],
-  "lastUpdated": "2025-07-25T00:00:00Z"
+  "lastUpdated": "2025-07-25T13:57:56.398Z"
 }

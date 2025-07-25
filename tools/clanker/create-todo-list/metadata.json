@@ -1,18 +1,21 @@
 {
-  "id": "core",
-  "name": "Core Tools",
-  "description": "Essential Clanker tools - file operations, process management, and more",
-  "author": "ziggler",
+  "id": "create_todo_list",
+  "name": "Create Todo List",
+  "description": "Create a new todo list for planning and tracking tasks",
+  "author": "Clanker Team",
   "versions": {
     "1.0.0": {
       "date": "2025-07-25",
       "dependencies": {},
       "minClankerVersion": "0.1.0",
-      "size": 5120
+      "size": 351237
     }
   },
   "latest": "1.0.0",
-  "tags": ["essential", "file", "process", "core"],
+  "tags": [
+    "builtin",
+    "official"
+  ],
   "homepage": "https://github.com/ziggle-dev/clanker",
   "repository": "https://github.com/ziggle-dev/clanker"
 }
