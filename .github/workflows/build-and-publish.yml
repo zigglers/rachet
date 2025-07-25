@@ -220,13 +220,19 @@ jobs:
           fi
           
           # Create tar archives for each org (if tools exist)
+          echo "DEBUG: Checking for tools directory at: $GITHUB_WORKSPACE/build/tools"
+          ls -la "$GITHUB_WORKSPACE/build/" || true
           if [ -d "$GITHUB_WORKSPACE/build/tools" ]; then
+            echo "DEBUG: Found tools directory, creating tar archives"
             cd "$GITHUB_WORKSPACE/build/tools"
             for org in */; do
               [ -d "$org" ] || continue
+              echo "DEBUG: Creating tar for org: $org"
               tar -czf "../${org%/}.tar.gz" "$org"
             done
             cd ../..
+          else
+            echo "DEBUG: No tools directory found at $GITHUB_WORKSPACE/build/tools"
           fi
           
           echo "Build completed successfully"

@@ -1,2 +1,3 @@
 {"version": "1.0.0", "tools": [
-],"timestamp":"2025-07-25T20:55:30Z"}
+{"id":"ai_math","name":"ai-math","version":"1.0.0","description":"An AI-powered calculator that interactively gets numbers and operators from the user, then uses AI to compute the result","author":"Example Developer","repository":"https://github.com/example/example-clanker-tool-ai-math","homepage":"","keywords":["clanker","tool","ai-math","calculator","math"],"created":"2025-07-25T17:35:00.000Z","updated":"2025-07-25T17:35:00.000Z","org":"example","tool":"ai-math"}
+],"timestamp":"2025-07-25T20:59:07Z"}
