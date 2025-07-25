@@ -131,7 +131,9 @@ jobs:
               fi
               
               echo "Building $ORG/$TOOL..."
+              echo "DEBUG: Current dir before cd: $(pwd)"
               cd "$tool_dir"
+              echo "DEBUG: Current dir after cd: $(pwd)"
               
               # Install and build (include dev deps for building)
               if [ -f "package-lock.json" ]; then
@@ -193,12 +195,12 @@ jobs:
               
               # Add to tools index
               if [ "$first" = false ]; then
-                echo "," >> ../../build/tools.json
+                echo "," >> "$GITHUB_WORKSPACE/build/tools.json"
               fi
               first=false
               
               TOOL_JSON=$(jq -c ". + {org: \"$ORG\", tool: \"$TOOL\"}" "$TOOL_BUILD_DIR/manifest.json")
-              echo "$TOOL_JSON" >> ../../build/tools.json
+              echo "$TOOL_JSON" | tee -a "$GITHUB_WORKSPACE/build/tools.json"
               
               echo "DEBUG: Added $ORG/$TOOL to tools.json - JSON: $TOOL_JSON"
               
