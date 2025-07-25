@@ -1,0 +1,14 @@
+{
+  "version": "1.0.0",
+  "tools": [
+    {
+      "org": "ziggler",
+      "name": "core",
+      "description": "Essential Clanker tools - file operations, process management, and more",
+      "latest": "1.0.0",
+      "downloads": 0,
+      "stars": 0
+    }
+  ],
+  "lastUpdated": "2025-07-25T00:00:00Z"
+}
