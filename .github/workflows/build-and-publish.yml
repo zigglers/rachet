@@ -121,11 +121,21 @@ jobs:
               [ -d "$tool_dir" ] || continue
               TOOL=$(basename "$tool_dir")
               
+              # Skip if no package.json (not a buildable tool)
+              if [ ! -f "$tool_dir/package.json" ]; then
+                echo "Skipping $ORG/$TOOL (no package.json)"
+                continue
+              fi
+              
               echo "Building $ORG/$TOOL..."
               cd "$tool_dir"
               
               # Install and build
-              npm ci --production
+              if [ -f "package-lock.json" ]; then
+                npm ci --omit=dev
+              else
+                npm install --omit=dev
+              fi
               npm run build
               
               # Bundle if available
