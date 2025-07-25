@@ -1,0 +1,237 @@
+name: Build and Publish Tools
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  validate-pr:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          
+      - name: Find changed tools
+        id: changed-tools
+        run: |
+          # Get list of changed files in PR
+          gh pr view ${{ github.event.pull_request.number }} --json files --jq '.files[].path' > changed_files.txt
+          
+          # Extract tool directories
+          grep '^tools/' changed_files.txt | cut -d'/' -f1-4 | sort -u > changed_tools.txt || true
+          
+          if [ -s changed_tools.txt ]; then
+            echo "Changed tools:"
+            cat changed_tools.txt
+            echo "has_changes=true" >> $GITHUB_OUTPUT
+          else
+            echo "No tool changes detected"
+            echo "has_changes=false" >> $GITHUB_OUTPUT
+          fi
+        env:
+          GH_TOKEN: ${{ github.token }}
+          
+      - name: Validate changed tools
+        if: steps.changed-tools.outputs.has_changes == 'true'
+        run: |
+          while IFS= read -r tool_path; do
+            echo "Validating $tool_path..."
+            
+            # Check required files
+            for required in "package.json" "src"; do
+              if [ ! -e "$tool_path/$required" ]; then
+                echo "❌ Missing required: $required"
+                exit 1
+              fi
+            done
+            
+            # Check for forbidden files
+            for forbidden in "bin" "dist" "node_modules"; do
+              if [ -e "$tool_path/$forbidden" ]; then
+                echo "❌ Found forbidden: $forbidden"
+                exit 1
+              fi
+            done
+            
+            # Validate package.json
+            cd "$tool_path"
+            
+            # Check name format
+            NAME=$(jq -r .name package.json)
+            if ! echo "$NAME" | grep -qE '^[a-z0-9-]+-clanker-tool-[a-z0-9-]+$'; then
+              echo "❌ Invalid package name format: $NAME"
+              echo "   Expected: org-clanker-tool-name"
+              exit 1
+            fi
+            
+            # Check required scripts
+            if ! jq -e '.scripts.build' package.json > /dev/null; then
+              echo "❌ Missing build script"
+              exit 1
+            fi
+            
+            # Test build
+            npm ci
+            npm run build
+            
+            # Check if build created output
+            if [ ! -d "bin" ] && [ ! -d "dist" ]; then
+              echo "❌ Build did not create output directory"
+              exit 1
+            fi
+            
+            echo "✅ $tool_path validated successfully"
+            cd - > /dev/null
+          done < changed_tools.txt
+
+  build-and-publish:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          
+      - name: Build all tools
+        id: build
+        run: |
+          # Create build directory
+          mkdir -p build
+          
+          # Create tools index
+          echo '{"version": "1.0.0", "tools": [' > build/tools.json
+          first=true
+          
+          # Find and build all tools
+          for org_dir in tools/*/; do
+            [ -d "$org_dir" ] || continue
+            ORG=$(basename "$org_dir")
+            
+            for tool_dir in "$org_dir"*/; do
+              [ -d "$tool_dir" ] || continue
+              TOOL=$(basename "$tool_dir")
+              
+              echo "Building $ORG/$TOOL..."
+              cd "$tool_dir"
+              
+              # Install and build
+              npm ci --production
+              npm run build
+              
+              # Bundle if available
+              if npm run | grep -q "bundle"; then
+                npm run bundle
+              fi
+              
+              # Find output file
+              if [ -f "bin/bundle.js" ]; then
+                OUTPUT="bin/bundle.js"
+              elif [ -f "bin/index.js" ]; then
+                OUTPUT="bin/index.js"
+              elif [ -f "dist/index.js" ]; then
+                OUTPUT="dist/index.js"
+              else
+                echo "❌ No output file found for $ORG/$TOOL"
+                exit 1
+              fi
+              
+              # Create tool directory in build
+              TOOL_BUILD_DIR="../../build/tools/$ORG/$TOOL"
+              mkdir -p "$TOOL_BUILD_DIR"
+              
+              # Copy built file
+              cp "$OUTPUT" "$TOOL_BUILD_DIR/index.js"
+              
+              # Create/copy manifest
+              if [ -f "manifest.json" ]; then
+                cp manifest.json "$TOOL_BUILD_DIR/"
+              else
+                # Generate from package.json
+                jq -n \
+                  --arg id "$(jq -r '.name' package.json | sed 's/.*-clanker-tool-//' | tr '-' '_')" \
+                  --arg name "$(jq -r '.name' package.json | sed 's/.*-clanker-tool-//')" \
+                  --arg version "$(jq -r '.version' package.json)" \
+                  --arg description "$(jq -r '.description // ""' package.json)" \
+                  --arg author "$(jq -r '.author // "Unknown"' package.json)" \
+                  --argjson keywords "$(jq '.keywords // []' package.json)" \
+                  '{
+                    id: $id,
+                    name: $name,
+                    version: $version,
+                    description: $description,
+                    author: $author,
+                    keywords: $keywords
+                  }' > "$TOOL_BUILD_DIR/manifest.json"
+              fi
+              
+              # Add to tools index
+              if [ "$first" = false ]; then
+                echo "," >> ../../build/tools.json
+              fi
+              first=false
+              
+              jq -c ". + {org: \"$ORG\", tool: \"$TOOL\"}" "$TOOL_BUILD_DIR/manifest.json" >> ../../build/tools.json
+              
+              cd - > /dev/null
+            done
+          done
+          
+          echo '],"timestamp":"'$(date -u +%Y-%m-%dT%H:%M:%SZ)'"}' >> build/tools.json
+          
+          # Create tar archives for each org
+          cd build/tools
+          for org in */; do
+            [ -d "$org" ] || continue
+            tar -czf "../${org%/}.tar.gz" "$org"
+          done
+          cd ../..
+          
+          echo "Build completed successfully"
+          
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: built-tools
+          path: build/
+          
+      - name: Create release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: v${{ github.run_number }}
+          release_name: Tools Build ${{ github.run_number }}
+          body: |
+            Automated build of Clanker tools.
+            
+            **Commit**: ${{ github.sha }}
+            **Date**: ${{ github.event.head_commit.timestamp }}
+            **Message**: ${{ github.event.head_commit.message }}
+          draft: false
+          prerelease: false
+          
+      - name: Upload release assets
+        run: |
+          # Upload tools.json
+          gh release upload "v${{ github.run_number }}" build/tools.json --clobber
+          
+          # Upload org archives
+          for archive in build/*.tar.gz; do
+            [ -f "$archive" ] || continue
+            gh release upload "v${{ github.run_number }}" "$archive" --clobber
+          done
+          
+          echo "Release assets uploaded successfully"
+        env:
+          GH_TOKEN: ${{ github.token }}
