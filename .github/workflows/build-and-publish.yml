@@ -130,11 +130,11 @@ jobs:
               echo "Building $ORG/$TOOL..."
               cd "$tool_dir"
               
-              # Install and build
+              # Install and build (include dev deps for building)
               if [ -f "package-lock.json" ]; then
-                npm ci --omit=dev
+                npm ci
               else
-                npm install --omit=dev
+                npm install
               fi
               npm run build
               
