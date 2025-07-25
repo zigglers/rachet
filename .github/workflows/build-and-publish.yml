@@ -198,13 +198,21 @@ jobs:
           
           echo '],"timestamp":"'$(date -u +%Y-%m-%dT%H:%M:%SZ)'"}' >> build/tools.json
           
-          # Create tar archives for each org
-          cd build/tools
-          for org in */; do
-            [ -d "$org" ] || continue
-            tar -czf "../${org%/}.tar.gz" "$org"
-          done
-          cd ../..
+          # Check if any tools were built
+          if [ "$first" = true ]; then
+            echo "No tools were built"
+            echo '{"version": "1.0.0", "tools": [], "timestamp": "'$(date -u +%Y-%m-%dT%H:%M:%SZ)'"}' > build/tools.json
+          fi
+          
+          # Create tar archives for each org (if tools exist)
+          if [ -d "$GITHUB_WORKSPACE/build/tools" ]; then
+            cd "$GITHUB_WORKSPACE/build/tools"
+            for org in */; do
+              [ -d "$org" ] || continue
+              tar -czf "../${org%/}.tar.gz" "$org"
+            done
+            cd ../..
+          fi
           
           echo "Build completed successfully"
           
