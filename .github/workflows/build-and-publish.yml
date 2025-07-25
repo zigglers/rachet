@@ -197,15 +197,19 @@ jobs:
               fi
               first=false
               
-              jq -c ". + {org: \"$ORG\", tool: \"$TOOL\"}" "$TOOL_BUILD_DIR/manifest.json" >> ../../build/tools.json
+              TOOL_JSON=$(jq -c ". + {org: \"$ORG\", tool: \"$TOOL\"}" "$TOOL_BUILD_DIR/manifest.json")
+              echo "$TOOL_JSON" >> ../../build/tools.json
               
-              echo "DEBUG: Added $ORG/$TOOL to tools.json"
+              echo "DEBUG: Added $ORG/$TOOL to tools.json - JSON: $TOOL_JSON"
               
               cd - > /dev/null
             done
           done
           
           echo '],"timestamp":"'$(date -u +%Y-%m-%dT%H:%M:%SZ)'"}' >> build/tools.json
+          
+          echo "DEBUG: Final tools.json content:"
+          cat build/tools.json
           
           # Check if any tools were built
           if [ "$first" = true ]; then
