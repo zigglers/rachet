@@ -1,0 +1,29 @@
+{
+  "name": "example-clanker-tool-ai-math",
+  "version": "1.0.0",
+  "description": "An AI-powered calculator that uses natural language to perform math operations",
+  "author": "Example Developer",
+  "type": "module",
+  "main": "bin/index.js",
+  "scripts": {
+    "build": "mkdir -p bin && cp src/index.js bin/index.js",
+    "dev": "tsx src/index.ts",
+    "dev:watch": "npm run build && npm run install:local && clanker --watch-tools --debug",
+    "test": "echo \"No tests yet\"",
+    "bundle": "esbuild src/index.js --bundle --platform=node --target=node16 --external:@ziggler/clanker --outfile=bin/bundle.js --minify",
+    "install:local": "node scripts/install-local.js",
+    "publish:tool": "node ../dist/index.js --publish",
+    "validate-tool": "node ../scripts/validate-tool-submission.js"
+  },
+  "keywords": ["clanker", "tool", "ai-math", "calculator", "math"],
+  "devDependencies": {
+    "@ziggler/clanker": "^0.1.0",
+    "esbuild": "^0.19.0",
+    "typescript": "^5.0.0",
+    "tsx": "^4.0.0",
+    "@types/node": "^20.0.0"
+  },
+  "peerDependencies": {
+    "@ziggler/clanker": ">=0.1.0"
+  }
+}
