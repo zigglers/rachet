@@ -8,8 +8,7 @@
       "date": "2025-07-25",
       "dependencies": {},
       "minClankerVersion": "0.1.0",
-      "size": 5120,
-      "sha256": "example-hash-will-be-computed"
+      "size": 5120
     }
   },
   "latest": "1.0.0",
