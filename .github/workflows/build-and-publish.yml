@@ -165,7 +165,7 @@ jobs:
               echo "DEBUG: Found output file: $OUTPUT"
               
               # Create tool directory in build
-              TOOL_BUILD_DIR="../../build/tools/$ORG/$TOOL"
+              TOOL_BUILD_DIR="$GITHUB_WORKSPACE/build/tools/$ORG/$TOOL"
               mkdir -p "$TOOL_BUILD_DIR"
               
               # Copy built file
