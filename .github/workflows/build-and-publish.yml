@@ -107,6 +107,7 @@ jobs:
       - name: Build all tools
         id: build
         run: |
+          set -x  # Enable debug output
           # Create build directory
           mkdir -p build
           
@@ -145,6 +146,8 @@ jobs:
                 npm run bundle
               fi
               
+              echo "DEBUG: Finished build/bundle for $ORG/$TOOL"
+              
               # Find output file
               if [ -f "bin/bundle.js" ]; then
                 OUTPUT="bin/bundle.js"
@@ -156,6 +159,8 @@ jobs:
                 echo "❌ No output file found for $ORG/$TOOL"
                 exit 1
               fi
+              
+              echo "DEBUG: Found output file: $OUTPUT"
               
               # Create tool directory in build
               TOOL_BUILD_DIR="../../build/tools/$ORG/$TOOL"
@@ -193,6 +198,8 @@ jobs:
               first=false
               
               jq -c ". + {org: \"$ORG\", tool: \"$TOOL\"}" "$TOOL_BUILD_DIR/manifest.json" >> ../../build/tools.json
+              
+              echo "DEBUG: Added $ORG/$TOOL to tools.json"
               
               cd - > /dev/null
             done
