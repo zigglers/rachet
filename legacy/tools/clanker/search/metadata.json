@@ -1,0 +1,21 @@
+{
+  "id": "search",
+  "name": "Search Files",
+  "description": "Search for files containing a pattern using ripgrep",
+  "author": "Clanker Team",
+  "versions": {
+    "1.0.0": {
+      "date": "2025-07-25",
+      "dependencies": {},
+      "minClankerVersion": "0.1.0",
+      "size": 351181
+    }
+  },
+  "latest": "1.0.0",
+  "tags": [
+    "builtin",
+    "official"
+  ],
+  "homepage": "https://github.com/ziggle-dev/clanker",
+  "repository": "https://github.com/ziggle-dev/clanker"
+}

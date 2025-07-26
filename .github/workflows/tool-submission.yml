@@ -1,0 +1,267 @@
+name: Tool Submission Pipeline
+
+on:
+  pull_request:
+    paths:
+      - 'submissions/**'
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+
+jobs:
+  validate-and-build:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: |
+          npm install -g esbuild
+          npm install fs-extra
+      
+      - name: Get changed files
+        id: changed-files
+        uses: tj-actions/changed-files@v40
+        with:
+          files: |
+            submissions/**
+      
+      - name: Extract tool information
+        id: tool-info
+        run: |
+          # Find the tool submission directory
+          TOOL_PATH=""
+          for file in ${{ steps.changed-files.outputs.all_changed_files }}; do
+            if [[ $file == submissions/* ]]; then
+              # Extract org/tool from path
+              TOOL_DIR=$(dirname $(dirname $file))
+              if [[ -f "$TOOL_DIR/package.json" ]]; then
+                TOOL_PATH=$TOOL_DIR
+                break
+              fi
+            fi
+          done
+          
+          if [[ -z "$TOOL_PATH" ]]; then
+            echo "❌ No tool submission found in changed files"
+            exit 1
+          fi
+          
+          # Extract org and tool name
+          ORG=$(basename $(dirname $TOOL_PATH))
+          TOOL=$(basename $TOOL_PATH)
+          
+          # Extract version from package.json
+          VERSION=$(node -e "console.log(require('./$TOOL_PATH/package.json').version)")
+          
+          # Create branch name
+          BRANCH="${ORG}/${TOOL}@${VERSION}"
+          
+          echo "tool_path=$TOOL_PATH" >> $GITHUB_OUTPUT
+          echo "org=$ORG" >> $GITHUB_OUTPUT
+          echo "tool=$TOOL" >> $GITHUB_OUTPUT
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "branch=$BRANCH" >> $GITHUB_OUTPUT
+          
+          echo "📦 Tool: $ORG/$TOOL@$VERSION"
+          echo "📁 Path: $TOOL_PATH"
+          echo "🌿 Branch: $BRANCH"
+      
+      - name: Validate tool structure
+        id: validate
+        run: |
+          echo "🔍 Validating tool..."
+          node scripts/validate-tool.js ${{ steps.tool-info.outputs.tool_path }}
+      
+      - name: Build tool
+        id: build
+        run: |
+          echo "🔨 Building tool..."
+          mkdir -p build-output
+          node scripts/build-tool.js ${{ steps.tool-info.outputs.tool_path }} build-output
+          
+          # Check build output
+          if [[ ! -f "build-output/index.js" ]]; then
+            echo "❌ Build failed: index.js not found"
+            exit 1
+          fi
+          
+          if [[ ! -f "build-output/manifest.json" ]]; then
+            echo "❌ Build failed: manifest.json not found"
+            exit 1
+          fi
+          
+          echo "✅ Build successful"
+          ls -la build-output/
+      
+      - name: Test tool integration
+        id: integration-test
+        run: |
+          echo "🧪 Running integration tests..."
+          
+          # Clone clanker
+          git clone https://github.com/ziggle-dev/clanker.git test-clanker
+          cd test-clanker
+          
+          # Install dependencies
+          npm install
+          
+          # Create test environment
+          export TEST_HOME=$(mktemp -d)
+          mkdir -p $TEST_HOME/.clanker/tools/${{ steps.tool-info.outputs.org }}/${{ steps.tool-info.outputs.tool }}/${{ steps.tool-info.outputs.version }}
+          
+          # Copy built tool
+          cp ../build-output/* $TEST_HOME/.clanker/tools/${{ steps.tool-info.outputs.org }}/${{ steps.tool-info.outputs.tool }}/${{ steps.tool-info.outputs.version }}/
+          
+          # Test tool loading
+          export HOME=$TEST_HOME
+          TOOLS_OUTPUT=$(npm run dev -- --list-tools 2>&1 || true)
+          
+          if echo "$TOOLS_OUTPUT" | grep -q "${{ steps.tool-info.outputs.tool }}"; then
+            echo "✅ Tool detected in --list-tools"
+          else
+            echo "❌ Tool not found in --list-tools"
+            echo "Output:"
+            echo "$TOOLS_OUTPUT"
+            exit 1
+          fi
+      
+      - name: Create staging branch
+        if: success()
+        run: |
+          git config user.name "Clanker Bot"
+          git config user.email "bot@clanker.dev"
+          
+          # Create staging branch
+          git checkout -b ${{ steps.tool-info.outputs.branch }}
+          
+          # Create tool directory
+          mkdir -p tools/${{ steps.tool-info.outputs.org }}/${{ steps.tool-info.outputs.tool }}/${{ steps.tool-info.outputs.version }}
+          
+          # Copy built files
+          cp build-output/* tools/${{ steps.tool-info.outputs.org }}/${{ steps.tool-info.outputs.tool }}/${{ steps.tool-info.outputs.version }}/
+          
+          # Create tool metadata at org/tool level
+          cat > tools/${{ steps.tool-info.outputs.org }}/${{ steps.tool-info.outputs.tool }}/metadata.json << EOF
+          {
+            "id": "${{ steps.tool-info.outputs.tool }}",
+            "name": "$(node -e "console.log(require('./build-output/manifest.json').name)")",
+            "description": "$(node -e "console.log(require('./build-output/manifest.json').description)")",
+            "author": $(node -e "console.log(JSON.stringify(require('./build-output/manifest.json').author))"),
+            "versions": {
+              "${{ steps.tool-info.outputs.version }}": {
+                "date": "$(date -u +%Y-%m-%d)",
+                "size": $(stat -f%z build-output/index.js 2>/dev/null || stat -c%s build-output/index.js)
+              }
+            },
+            "latest": "${{ steps.tool-info.outputs.version }}",
+            "tags": $(node -e "console.log(JSON.stringify(require('./build-output/manifest.json').tags))"),
+            "repository": "$(node -e "console.log(require('./build-output/manifest.json').repository || '')")"
+          }
+          EOF
+          
+          # Commit and push
+          git add tools/
+          git commit -m "🤖 Built tool: ${{ steps.tool-info.outputs.org }}/${{ steps.tool-info.outputs.tool }}@${{ steps.tool-info.outputs.version }}"
+          git push origin ${{ steps.tool-info.outputs.branch }}
+      
+      - name: Comment on PR
+        if: always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const success = ${{ steps.integration-test.outcome == 'success' }};
+            const org = '${{ steps.tool-info.outputs.org }}';
+            const tool = '${{ steps.tool-info.outputs.tool }}';
+            const version = '${{ steps.tool-info.outputs.version }}';
+            const branch = '${{ steps.tool-info.outputs.branch }}';
+            
+            let comment = success ? `## 🎉 Tool Build Successful!\n\n` : `## ❌ Tool Build Failed\n\n`;
+            
+            comment += `**Tool**: \`${org}/${tool}@${version}\`\n`;
+            comment += `**Branch**: \`${branch}\`\n\n`;
+            
+            if (success) {
+              comment += `### ✅ All Checks Passed\n\n`;
+              comment += `- Structure validation: ✅\n`;
+              comment += `- Build process: ✅\n`;
+              comment += `- Integration test: ✅\n\n`;
+              
+              comment += `### 🧪 Test Your Tool\n\n`;
+              comment += `While this PR is open, you can test your tool:\n\n`;
+              comment += `\`\`\`bash\n`;
+              comment += `# Enable experimental tools\n`;
+              comment += `clanker --enable-experimental\n\n`;
+              comment += `# Install from PR\n`;
+              comment += `clanker --install ${org}/${tool}@${branch}\n\n`;
+              comment += `# Or install by PR number\n`;
+              comment += `clanker --install ${org}/${tool}@pr-${{ github.event.number }}\n`;
+              comment += `\`\`\`\n\n`;
+              
+              comment += `### 📋 Next Steps\n\n`;
+              comment += `1. Test the tool using the commands above\n`;
+              comment += `2. Address any review feedback\n`;
+              comment += `3. Once approved, merge to publish to the main registry\n`;
+            } else {
+              comment += `### ❌ Checks Failed\n\n`;
+              comment += `Please check the [workflow logs](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) for details.\n\n`;
+              comment += `Common issues:\n`;
+              comment += `- Missing required files (package.json, README.md)\n`;
+              comment += `- Invalid package.json structure\n`;
+              comment += `- Security vulnerabilities in dependencies\n`;
+              comment += `- Tool not detected after build\n`;
+            }
+            
+            // Add build artifacts info if available
+            try {
+              const manifestPath = 'build-output/manifest.json';
+              const manifest = require(manifestPath);
+              comment += `\n### 📊 Build Info\n\n`;
+              comment += `- Bundle size: ${(manifest.buildInfo.bundleSize / 1024).toFixed(2)} KB\n`;
+              comment += `- Dependencies: ${manifest.dependencies.bundled.length} bundled, ${manifest.dependencies.external.length} external\n`;
+              comment += `- Category: ${manifest.category}\n`;
+              comment += `- Capabilities: ${manifest.capabilities.join(', ') || 'none'}\n`;
+            } catch (e) {
+              // Manifest not available
+            }
+            
+            await github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });
+
+  security-scan:
+    runs-on: ubuntu-latest
+    if: success()
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Run Snyk security scan
+        uses: snyk/actions/node@master
+        continue-on-error: true
+        with:
+          args: --severity-threshold=high
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+      
+      - name: Upload security results
+        uses: github/codeql-action/upload-sarif@v2
+        if: always()
+        with:
+          sarif_file: snyk.sarif

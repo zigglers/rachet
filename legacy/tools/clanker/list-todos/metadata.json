@@ -1,0 +1,21 @@
+{
+  "id": "list_todos",
+  "name": "List Todos",
+  "description": "List all current todos in the todo list",
+  "author": "Clanker Team",
+  "versions": {
+    "1.0.0": {
+      "date": "2025-07-25",
+      "dependencies": {},
+      "minClankerVersion": "0.1.0",
+      "size": 351185
+    }
+  },
+  "latest": "1.0.0",
+  "tags": [
+    "builtin",
+    "official"
+  ],
+  "homepage": "https://github.com/ziggle-dev/clanker",
+  "repository": "https://github.com/ziggle-dev/clanker"
+}

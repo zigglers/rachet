@@ -1,0 +1,21 @@
+{
+  "id": "list",
+  "name": "List Files",
+  "description": "List files and directories in a given path",
+  "author": "Clanker Team",
+  "versions": {
+    "1.0.0": {
+      "date": "2025-07-25",
+      "dependencies": {},
+      "minClankerVersion": "0.1.0",
+      "size": 351179
+    }
+  },
+  "latest": "1.0.0",
+  "tags": [
+    "builtin",
+    "official"
+  ],
+  "homepage": "https://github.com/ziggle-dev/clanker",
+  "repository": "https://github.com/ziggle-dev/clanker"
+}
