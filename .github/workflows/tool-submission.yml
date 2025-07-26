@@ -148,7 +148,7 @@ jobs:
           npm init -y
           npm install esbuild @types/node typescript
           # Install clanker as dev dependency for validation
-          npm install --save-dev @ziggler/clanker@latest
+          npm install --save-dev @ziggler/clanker@0.1.34
           
           # Create build script
           cat > build-tool.js << 'EOF'
