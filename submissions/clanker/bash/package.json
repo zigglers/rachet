@@ -2,7 +2,7 @@
   "name": "@clanker/bash",
   "version": "1.0.0",
   "description": "Execute shell commands with timeout and security controls",
-  "main": "src/index.ts",
+  "main": "src/index.tsx",
   "author": {
     "name": "Clanker Team",
     "email": "tools@clanker.dev",
