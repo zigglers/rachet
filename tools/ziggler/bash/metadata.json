@@ -1,0 +1,14 @@
+{
+  "id": "bash",
+  "name": "bash",
+  "description": "Execute bash commands with user confirmation",
+  "publisher": "ziggle-dev",
+  "repository": "https://github.com/ziggle-dev/clanker-bash-tool",
+  "versions": {
+    "1.0.0": {
+      "date": "2025-07-26",
+      "commit": "2306b75"
+    }
+  },
+  "latest": "1.0.0"
+}
