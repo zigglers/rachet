@@ -439,6 +439,13 @@ jobs:
         run: |
           echo "🔄 Creating pull request..."
           
+          # Determine security status icon
+          if [[ "${{ steps.security.outputs.security_status }}" == "pass" ]]; then
+            SECURITY_ICON="✅"
+          else
+            SECURITY_ICON="⚠️"
+          fi
+          
           # Create PR using GitHub CLI
           PR_URL=$(gh pr create \
             --base main \
@@ -459,7 +466,7 @@ This PR was automatically generated from issue #${{ github.event.issue.number }}
 - ✅ Repository cloned
 - ✅ Tool built successfully
 - ✅ Format validated
-- ${{ steps.security.outputs.security_status == 'pass' && '✅' || '⚠️' }} Security scan
+- ${SECURITY_ICON} Security scan
 
 Closes #${{ github.event.issue.number }}" \
             --label "tool-submission" \
@@ -494,13 +501,13 @@ Closes #${{ github.event.issue.number }}" \
             
             // Add status for each phase
             comment += `### 📊 Pipeline Status\n`;
-            comment += `- Manifest Parsing: ${{ steps.parse-issue.outcome == 'success' && '✅' || '❌' }}\n`;
-            comment += `- Repository Clone: ${{ steps.clone-tool.outcome == 'success' && '✅' || '❌' }}\n`;
-            comment += `- Build: ${{ steps.build.outcome == 'success' && '✅' || '❌' }}\n`;
-            comment += `- Format Validation: ${{ steps.validate.outcome == 'success' && '✅' || '❌' }}\n`;
-            comment += `- Security Scan: ${securityStatus === 'pass' && '✅' || '⚠️'}\n`;
-            comment += `- Integration Branch: ${{ steps.integration.outcome == 'success' && '✅' || '❌' }}\n`;
-            comment += `- Pull Request: ${{ steps.create-pr.outcome == 'success' && '✅' || '❌' }}\n\n`;
+            comment += `- Manifest Parsing: ${'${{ steps.parse-issue.outcome }}' === 'success' ? '✅' : '❌'}\n`;
+            comment += `- Repository Clone: ${'${{ steps.clone-tool.outcome }}' === 'success' ? '✅' : '❌'}\n`;
+            comment += `- Build: ${'${{ steps.build.outcome }}' === 'success' ? '✅' : '❌'}\n`;
+            comment += `- Format Validation: ${'${{ steps.validate.outcome }}' === 'success' ? '✅' : '❌'}\n`;
+            comment += `- Security Scan: ${securityStatus === 'pass' ? '✅' : '⚠️'}\n`;
+            comment += `- Integration Branch: ${'${{ steps.integration.outcome }}' === 'success' ? '✅' : '❌'}\n`;
+            comment += `- Pull Request: ${'${{ steps.create-pr.outcome }}' === 'success' ? '✅' : '❌'}\n\n`;
             
             if (success) {
               // Success message
