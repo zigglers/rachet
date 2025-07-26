@@ -1,0 +1,469 @@
+name: Tool Submission Pipeline
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize]
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+
+jobs:
+  process-submission:
+    name: Process Tool Submission
+    runs-on: ubuntu-latest
+    
+    steps:
+      # Phase 1: Setup
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      
+      # Phase 2: Parse PR and Generate Manifest
+      - name: Parse PR Description
+        id: parse-pr
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const pr = context.payload.pull_request;
+            const body = pr.body || '';
+            
+            // Parse required fields
+            const repoMatch = body.match(/\*\*Repository URL\*\*.*?:\s*(?:<!--.*?-->)?\s*(https?:\/\/[^\s]+)/);
+            const descMatch = body.match(/\*\*Description\*\*.*?:\s*(?:<!--.*?-->)?\s*([^\n]+)/);
+            
+            if (!repoMatch || !descMatch) {
+              core.setFailed('Missing required fields: Repository URL and Description');
+              
+              // Post comment about missing fields
+              await github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: `## ❌ Missing Required Information\n\nPlease edit your PR description to include:\n- **Repository URL**: The GitHub repository containing your tool\n- **Description**: A brief description of what your tool does\n\nUse the PR template as a guide.`
+              });
+              return;
+            }
+            
+            const repoUrl = repoMatch[1].trim();
+            const description = descMatch[1].trim();
+            
+            // Parse optional fields
+            const publisherMatch = body.match(/\*\*Publisher\*\*.*?:\s*(?:<!--.*?-->)?\s*([^\n]*)/);
+            const orgMatch = body.match(/\*\*Organization\*\*.*?:\s*(?:<!--.*?-->)?\s*([^\n]*)/);
+            const nameMatch = body.match(/\*\*Tool Name\*\*.*?:\s*(?:<!--.*?-->)?\s*([^\n]*)/);
+            const commitMatch = body.match(/\*\*Commit Hash\*\*.*?:\s*(?:<!--.*?-->)?\s*([^\n]*)/);
+            const versionMatch = body.match(/\*\*Version\*\*.*?:\s*(?:<!--.*?-->)?\s*([^\n]*)/);
+            
+            // Extract repo info
+            const repoRegex = /github\.com\/([^\/]+)\/([^\/\s]+)/;
+            const repoInfo = repoUrl.match(repoRegex);
+            
+            if (!repoInfo) {
+              core.setFailed('Invalid repository URL format');
+              return;
+            }
+            
+            const repoOrg = repoInfo[1];
+            const repoName = repoInfo[2].replace(/\.git$/, '');
+            
+            // Set defaults
+            const publisher = publisherMatch?.[1]?.trim() || pr.user.login;
+            const organization = orgMatch?.[1]?.trim() || repoOrg;
+            const toolName = nameMatch?.[1]?.trim() || repoName;
+            const commitHash = commitMatch?.[1]?.trim() || '';
+            const version = versionMatch?.[1]?.trim() || '';
+            
+            // Output manifest data
+            core.setOutput('repo_url', repoUrl);
+            core.setOutput('repo_org', repoOrg);
+            core.setOutput('repo_name', repoName);
+            core.setOutput('description', description);
+            core.setOutput('publisher', publisher);
+            core.setOutput('organization', organization);
+            core.setOutput('tool_name', toolName);
+            core.setOutput('commit_hash', commitHash);
+            core.setOutput('version', version);
+            
+            console.log('Parsed manifest:', {
+              repoUrl,
+              description,
+              publisher,
+              organization,
+              toolName,
+              commitHash,
+              version
+            });
+      
+      # Phase 3: Clone and Validate Tool Repository
+      - name: Clone Tool Repository
+        if: success()
+        id: clone-tool
+        run: |
+          echo "📥 Cloning tool repository..."
+          
+          REPO_URL="${{ steps.parse-pr.outputs.repo_url }}"
+          COMMIT_HASH="${{ steps.parse-pr.outputs.commit_hash }}"
+          
+          # Clone the repository
+          git clone "$REPO_URL" tool-repo
+          cd tool-repo
+          
+          # Use specific commit or latest main
+          if [[ -n "$COMMIT_HASH" ]]; then
+            echo "Checking out commit: $COMMIT_HASH"
+            git checkout "$COMMIT_HASH"
+          else
+            echo "Using latest main branch"
+            COMMIT_HASH=$(git rev-parse --short HEAD)
+          fi
+          
+          echo "commit_hash=$COMMIT_HASH" >> $GITHUB_OUTPUT
+          
+          # Generate version if not specified
+          VERSION="${{ steps.parse-pr.outputs.version }}"
+          if [[ -z "$VERSION" ]]; then
+            VERSION="$COMMIT_HASH"
+          fi
+          
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+      
+      # Phase 4: Build and Bundle Tool
+      - name: Setup Build Environment
+        if: success()
+        run: |
+          # Install build dependencies
+          npm init -y
+          npm install esbuild @types/node typescript
+          
+          # Create build script
+          cat > build-tool.js << 'EOF'
+          const esbuild = require('esbuild');
+          const fs = require('fs');
+          const path = require('path');
+          
+          async function build() {
+            const toolDir = './tool-repo';
+            const outputDir = './build-output';
+            
+            // Find entry point
+            let entryPoint;
+            const possibleEntries = [
+              'src/index.ts',
+              'src/index.tsx',
+              'src/index.js',
+              'src/index.jsx',
+              'index.ts',
+              'index.tsx',
+              'index.js',
+              'index.jsx'
+            ];
+            
+            for (const entry of possibleEntries) {
+              if (fs.existsSync(path.join(toolDir, entry))) {
+                entryPoint = path.join(toolDir, entry);
+                break;
+              }
+            }
+            
+            if (!entryPoint) {
+              throw new Error('No entry point found');
+            }
+            
+            console.log('Building from:', entryPoint);
+            
+            // Bundle the tool
+            await esbuild.build({
+              entryPoints: [entryPoint],
+              bundle: true,
+              format: 'cjs',
+              platform: 'node',
+              target: 'node16',
+              outfile: path.join(outputDir, 'index.js'),
+              external: [
+                'react',
+                'ink',
+                '@ziggler/clanker',
+                'child_process',
+                'fs',
+                'path',
+                'os',
+                'util',
+                'stream',
+                'events',
+                'crypto'
+              ]
+            });
+            
+            console.log('✅ Build complete');
+          }
+          
+          build().catch(err => {
+            console.error('❌ Build failed:', err);
+            process.exit(1);
+          });
+          EOF
+      
+      - name: Build Tool
+        if: success()
+        id: build
+        run: |
+          echo "🔨 Building tool..."
+          
+          # Create output directory
+          mkdir -p build-output
+          
+          # Run build
+          node build-tool.js
+          
+          # Check if build succeeded
+          if [[ ! -f "build-output/index.js" ]]; then
+            echo "❌ Build failed: No output file"
+            exit 1
+          fi
+          
+          echo "✅ Build successful"
+          ls -la build-output/
+      
+      # Phase 5: Validate Tool Format
+      - name: Validate Tool Format
+        if: success()
+        id: validate
+        run: |
+          echo "🔍 Validating tool format..."
+          
+          # Create validation script
+          cat > validate-tool.js << 'EOF'
+          const fs = require('fs');
+          
+          try {
+            // Load the built tool
+            const tool = require('./build-output/index.js');
+            
+            // Check if it exports required clanker interface
+            if (typeof tool.default !== 'object' && typeof tool !== 'object') {
+              throw new Error('Tool must export an object (default export or module.exports)');
+            }
+            
+            const toolObj = tool.default || tool;
+            
+            // Check required properties
+            const required = ['id', 'name', 'description', 'execute'];
+            for (const prop of required) {
+              if (!toolObj[prop]) {
+                throw new Error(`Missing required property: ${prop}`);
+              }
+            }
+            
+            // Check execute is a function
+            if (typeof toolObj.execute !== 'function') {
+              throw new Error('execute must be a function');
+            }
+            
+            console.log('✅ Tool format is valid');
+            console.log('Tool ID:', toolObj.id);
+            console.log('Tool Name:', toolObj.name);
+            
+          } catch (error) {
+            console.error('❌ Validation failed:', error.message);
+            process.exit(1);
+          }
+          EOF
+          
+          node validate-tool.js
+      
+      # Phase 6: Create Manifest
+      - name: Create Tool Manifest
+        if: success()
+        id: manifest
+        run: |
+          echo "📋 Creating manifest..."
+          
+          cat > build-output/manifest.yml << EOF
+          id: ${{ steps.parse-pr.outputs.organization }}/${{ steps.parse-pr.outputs.tool_name }}
+          name: ${{ steps.parse-pr.outputs.tool_name }}
+          description: ${{ steps.parse-pr.outputs.description }}
+          version: ${{ steps.clone-tool.outputs.version }}
+          publisher: ${{ steps.parse-pr.outputs.publisher }}
+          organization: ${{ steps.parse-pr.outputs.organization }}
+          repository: ${{ steps.parse-pr.outputs.repo_url }}
+          commit: ${{ steps.clone-tool.outputs.commit_hash }}
+          date: $(date -u +%Y-%m-%d)
+          EOF
+          
+          echo "Manifest created:"
+          cat build-output/manifest.yml
+      
+      # Phase 7: Security Scan
+      - name: Security Scan
+        if: success()
+        id: security
+        continue-on-error: true
+        run: |
+          echo "🔒 Running security scan..."
+          
+          cd tool-repo
+          
+          # Check for package.json
+          if [[ -f "package.json" ]]; then
+            # Install dependencies for audit
+            npm install --package-lock-only || true
+            
+            # Run audit
+            npm audit --json > ../audit-report.json || true
+            
+            # Check for high/critical vulnerabilities
+            if jq -e '.metadata.vulnerabilities.high > 0 or .metadata.vulnerabilities.critical > 0' ../audit-report.json > /dev/null 2>&1; then
+              echo "⚠️  Security vulnerabilities found"
+              echo "security_status=warning" >> $GITHUB_OUTPUT
+            else
+              echo "✅ No high/critical vulnerabilities"
+              echo "security_status=pass" >> $GITHUB_OUTPUT
+            fi
+          else
+            echo "✅ No package.json to audit"
+            echo "security_status=pass" >> $GITHUB_OUTPUT
+          fi
+      
+      # Phase 8: Create Staging Branch
+      - name: Create Staging Branch
+        if: success()
+        id: staging
+        run: |
+          echo "🌿 Creating staging branch..."
+          
+          # Configure git
+          git config user.name "Clanker Bot"
+          git config user.email "bot@clanker.dev"
+          
+          # Create branch name
+          BRANCH="${{ steps.parse-pr.outputs.publisher }}/${{ steps.parse-pr.outputs.tool_name }}@${{ steps.clone-tool.outputs.commit_hash }}"
+          
+          # Create and checkout branch
+          git checkout -b "$BRANCH"
+          
+          # Create tool directory
+          TOOL_DIR="tools/${{ steps.parse-pr.outputs.organization }}/${{ steps.parse-pr.outputs.tool_name }}/${{ steps.clone-tool.outputs.version }}"
+          mkdir -p "$TOOL_DIR"
+          
+          # Copy build artifacts
+          cp build-output/* "$TOOL_DIR/"
+          
+          # Create tool metadata
+          cat > "tools/${{ steps.parse-pr.outputs.organization }}/${{ steps.parse-pr.outputs.tool_name }}/metadata.json" << EOF
+          {
+            "id": "${{ steps.parse-pr.outputs.tool_name }}",
+            "name": "${{ steps.parse-pr.outputs.tool_name }}",
+            "description": "${{ steps.parse-pr.outputs.description }}",
+            "publisher": "${{ steps.parse-pr.outputs.publisher }}",
+            "repository": "${{ steps.parse-pr.outputs.repo_url }}",
+            "versions": {
+              "${{ steps.clone-tool.outputs.version }}": {
+                "date": "$(date -u +%Y-%m-%d)",
+                "commit": "${{ steps.clone-tool.outputs.commit_hash }}"
+              }
+            },
+            "latest": "${{ steps.clone-tool.outputs.version }}"
+          }
+          EOF
+          
+          # Commit and push
+          git add tools/
+          git commit -m "🤖 Add tool: ${{ steps.parse-pr.outputs.organization }}/${{ steps.parse-pr.outputs.tool_name }}@${{ steps.clone-tool.outputs.version }}"
+          git push origin "$BRANCH"
+          
+          echo "branch=$BRANCH" >> $GITHUB_OUTPUT
+      
+      # Phase 9: Post Results
+      - name: Post Results Comment
+        if: always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const success = ${{ steps.staging.outcome == 'success' }};
+            const securityStatus = '${{ steps.security.outputs.security_status }}' || 'unknown';
+            
+            let comment = success ? 
+              `## ✅ Tool Submission Successful!\n\n` : 
+              `## ❌ Tool Submission Failed\n\n`;
+            
+            // Add tool info
+            comment += `### 📦 Tool Information\n`;
+            comment += `- **Name**: \`${{ steps.parse-pr.outputs.organization }}/${{ steps.parse-pr.outputs.tool_name }}\`\n`;
+            comment += `- **Version**: \`${{ steps.clone-tool.outputs.version }}\`\n`;
+            comment += `- **Publisher**: @${{ steps.parse-pr.outputs.publisher }}\n`;
+            comment += `- **Repository**: ${{ steps.parse-pr.outputs.repo_url }}\n\n`;
+            
+            // Add status for each phase
+            comment += `### 📊 Pipeline Status\n`;
+            comment += `- Manifest Parsing: ${{ steps.parse-pr.outcome == 'success' ? '✅' : '❌' }}\n`;
+            comment += `- Repository Clone: ${{ steps.clone-tool.outcome == 'success' ? '✅' : '❌' }}\n`;
+            comment += `- Build: ${{ steps.build.outcome == 'success' ? '✅' : '❌' }}\n`;
+            comment += `- Format Validation: ${{ steps.validate.outcome == 'success' ? '✅' : '❌' }}\n`;
+            comment += `- Security Scan: ${securityStatus === 'pass' ? '✅' : '⚠️'}\n`;
+            comment += `- Staging Branch: ${{ steps.staging.outcome == 'success' ? '✅' : '❌' }}\n\n`;
+            
+            if (success) {
+              // Success message
+              comment += `### 🎉 Next Steps\n\n`;
+              comment += `Your tool has been successfully built and staged! `;
+              comment += `A maintainer will review your submission and merge it to the main registry.\n\n`;
+              
+              comment += `**Staging Branch**: \`${{ steps.staging.outputs.branch }}\`\n\n`;
+              
+              comment += `While waiting for review, you can test your tool:\n`;
+              comment += `\`\`\`bash\n`;
+              comment += `# Install from staging branch\n`;
+              comment += `clanker install ${{ steps.parse-pr.outputs.organization }}/${{ steps.parse-pr.outputs.tool_name }}@${{ steps.staging.outputs.branch }}\n`;
+              comment += `\`\`\`\n\n`;
+              
+              if (securityStatus === 'warning') {
+                comment += `### ⚠️ Security Notice\n`;
+                comment += `Some security vulnerabilities were detected. While not blocking, please consider addressing them.\n\n`;
+              }
+              
+              comment += `Thank you @${{ steps.parse-pr.outputs.publisher }} for your contribution! 🙏\n\n`;
+              comment += `---\n`;
+              comment += `@ziggle-dev/maintainers - This PR is ready for review. `;
+              comment += `All automated checks have passed. Click "Merge" when ready to publish to the main registry.`;
+              
+            } else {
+              // Failure message
+              comment += `### ❌ Action Required\n\n`;
+              
+              // Specific error guidance
+              if (${{ steps.parse-pr.outcome != 'success' }}) {
+                comment += `Please edit your PR description to include the required fields.\n`;
+              } else if (${{ steps.clone-tool.outcome != 'success' }}) {
+                comment += `Failed to clone the repository. Please check:\n`;
+                comment += `- Repository URL is correct and accessible\n`;
+                comment += `- Commit hash (if specified) exists\n`;
+              } else if (${{ steps.build.outcome != 'success' }}) {
+                comment += `Failed to build the tool. Please ensure:\n`;
+                comment += `- Your tool has a valid entry point (index.ts/js)\n`;
+                comment += `- All dependencies are properly declared\n`;
+                comment += `- The code compiles without errors\n`;
+              } else if (${{ steps.validate.outcome != 'success' }}) {
+                comment += `Tool format validation failed. Please ensure your tool:\n`;
+                comment += `- Exports an object with required properties (id, name, description, execute)\n`;
+                comment += `- The execute property is a function\n`;
+                comment += `- Follows the clanker tool format\n`;
+              }
+              
+              comment += `\nPlease fix the issues and push a new commit to trigger the pipeline again.`;
+            }
+            
+            // Post comment
+            await github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });
