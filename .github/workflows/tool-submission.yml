@@ -457,13 +457,13 @@ jobs:
             
             // Add status for each phase
             comment += `### 📊 Pipeline Status\n`;
-            comment += `- Manifest Parsing: ${{ steps.parse-issue.outcome == 'success' ? '✅' : '❌' }}\n`;
-            comment += `- Repository Clone: ${{ steps.clone-tool.outcome == 'success' ? '✅' : '❌' }}\n`;
-            comment += `- Build: ${{ steps.build.outcome == 'success' ? '✅' : '❌' }}\n`;
-            comment += `- Format Validation: ${{ steps.validate.outcome == 'success' ? '✅' : '❌' }}\n`;
-            comment += `- Security Scan: ${securityStatus === 'pass' ? '✅' : '⚠️'}\n`;
-            comment += `- Integration Branch: ${{ steps.integration.outcome == 'success' ? '✅' : '❌' }}\n`;
-            comment += `- Pull Request: ${{ steps.create-pr.outcome == 'success' ? '✅' : '❌' }}\n\n`;
+            comment += `- Manifest Parsing: ${{ steps.parse-issue.outcome == 'success' && '✅' || '❌' }}\n`;
+            comment += `- Repository Clone: ${{ steps.clone-tool.outcome == 'success' && '✅' || '❌' }}\n`;
+            comment += `- Build: ${{ steps.build.outcome == 'success' && '✅' || '❌' }}\n`;
+            comment += `- Format Validation: ${{ steps.validate.outcome == 'success' && '✅' || '❌' }}\n`;
+            comment += `- Security Scan: ${securityStatus === 'pass' && '✅' || '⚠️'}\n`;
+            comment += `- Integration Branch: ${{ steps.integration.outcome == 'success' && '✅' || '❌' }}\n`;
+            comment += `- Pull Request: ${{ steps.create-pr.outcome == 'success' && '✅' || '❌' }}\n\n`;
             
             if (success) {
               // Success message
