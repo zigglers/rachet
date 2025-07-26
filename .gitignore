@@ -1,0 +1,40 @@
+# Node modules
+node_modules/
+.build-temp/
+
+# Build outputs
+build-output/
+build-tool.js
+validate-tool.mjs
+
+# Package files
+package.json
+package-lock.json
+
+# Audit reports
+audit-report.json
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor directories and files
+.idea
+.vscode
+*.swp
+*.swo
+*~
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
