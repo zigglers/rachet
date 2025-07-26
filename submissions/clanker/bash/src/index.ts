@@ -33,11 +33,11 @@ export default createTool()
             
             // Check for extremely dangerous patterns
             const dangerousPatterns = [
-                /rm\s+-rf\s+\/(?:\s|$)/,     // rm -rf /
-                /:\(\)\s*\{[^}]*\}\s*:/,      // Fork bomb
-                /dd\s+.*of=\/dev\/[sh]d/,     // dd to disk devices
-                />\/dev\/[sh]d/,              // Overwriting disk devices
-                /mkfs\./                      // Formatting filesystems
+                new RegExp('rm\\s+-rf\\s+/(?:\\s|$)'),     // rm -rf /
+                /:\(\)\s*\{[^}]*\}\s*:/,                    // Fork bomb
+                /dd\s+.*of=\/dev\/[sh]d/,                   // dd to disk devices
+                />\/dev\/[sh]d/,                            // Overwriting disk devices
+                /mkfs\./                                    // Formatting filesystems
             ];
             
             for (const pattern of dangerousPatterns) {
