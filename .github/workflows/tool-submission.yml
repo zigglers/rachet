@@ -142,6 +142,9 @@ jobs:
           # Install dependencies
           npm install
           
+          # Build clanker
+          npm run build || true
+          
           # Create test environment
           export TEST_HOME=$(mktemp -d)
           mkdir -p $TEST_HOME/.clanker/tools/${{ steps.tool-info.outputs.org }}/${{ steps.tool-info.outputs.tool }}/${{ steps.tool-info.outputs.version }}
