@@ -144,21 +144,28 @@ jobs:
       - name: Setup Build Environment
         if: success()
         run: |
+          # Create a temporary build directory
+          mkdir -p .build-temp
+          cd .build-temp
+          
           # Install build dependencies
           npm init -y
           npm install esbuild @types/node typescript
           # Install clanker as dev dependency for validation
           npm install --save-dev @ziggler/clanker@latest
           
+          # Copy build script to temp directory
+          cd ..
+          
           # Create build script
-          cat > build-tool.js << 'EOF'
+          cat > .build-temp/build-tool.js << 'EOF'
           const esbuild = require('esbuild');
           const fs = require('fs');
           const path = require('path');
           
           async function build() {
-            const toolDir = './tool-repo';
-            const outputDir = './build-output';
+            const toolDir = '../tool-repo';
+            const outputDir = '../build-output';
             
             // Find entry point
             let entryPoint;
@@ -231,8 +238,8 @@ jobs:
           # Create output directory
           mkdir -p build-output
           
-          # Run build
-          node build-tool.js
+          # Run build from temp directory
+          cd .build-temp && node build-tool.js && cd ..
           
           # Check if build succeeded
           if [[ ! -f "build-output/index.js" ]]; then
@@ -415,7 +422,10 @@ jobs:
           EOF
           fi
           
-          # Commit and push
+          # Clean up temporary files before committing
+          rm -rf .build-temp node_modules package*.json build-tool.js tool-repo audit-report.json validate-tool.mjs 2>/dev/null || true
+          
+          # Commit and push only the tools directory
           git add tools/
           git commit -m "feat: add tool ${{ steps.parse-issue.outputs.organization }}/${{ steps.parse-issue.outputs.tool_name }}@${{ steps.clone-tool.outputs.version }}"
           git push origin "$BRANCH"
