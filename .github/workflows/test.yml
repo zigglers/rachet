@@ -1,0 +1,10 @@
+name: Test Workflow
+on:
+  issues:
+    types: [opened, edited]
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "Issue event triggered"
+EOF < /dev/null
