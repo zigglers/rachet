@@ -1,0 +1,10 @@
+{
+  "name": "clanker-tools-scripts",
+  "version": "1.0.0",
+  "description": "Build and validation scripts for clanker tools",
+  "private": true,
+  "dependencies": {
+    "esbuild": "^0.19.0",
+    "fs-extra": "^11.0.0"
+  }
+}
