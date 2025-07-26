@@ -41,7 +41,7 @@ jobs:
             
             // Parse fields from issue template
             const parseField = (fieldName) => {
-              const regex = new RegExp(`### ${fieldName}\\s*\\n\\n(.+?)(?=\\n\\n###|\\n\\n##|$)`, 's');
+              const regex = new RegExp(`### ${fieldName}\\s*\\n\\n([^#]*?)(?=\\n\\n###|$)`, 's');
               const match = body.match(regex);
               return match ? match[1].trim() : '';
             };
