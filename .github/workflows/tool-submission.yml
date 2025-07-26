@@ -247,6 +247,42 @@ jobs:
           # Create validation script
           cat > validate-tool.js << 'EOF'
           const fs = require('fs');
+          const Module = require('module');
+          const originalRequire = Module.prototype.require;
+          
+          // Mock @ziggler/clanker for validation
+          Module.prototype.require = function(id) {
+            if (id === '@ziggler/clanker') {
+              return {
+                createTool: () => ({
+                  id: () => ({ name: () => ({ description: () => ({ category: () => ({ capabilities: () => ({ tags: () => ({ 
+                    stringArg: () => ({ numberArg: () => ({ booleanArg: () => ({ onInitialize: () => ({ execute: () => ({ examples: () => ({ 
+                      build: () => ({ id: 'mock', name: 'Mock Tool', description: 'Mock', execute: () => {} })
+                    }) }) }) }) }) }),
+                    numberArg: () => ({ booleanArg: () => ({ onInitialize: () => ({ execute: () => ({ examples: () => ({ 
+                      build: () => ({ id: 'mock', name: 'Mock Tool', description: 'Mock', execute: () => {} })
+                    }) }) }) }) }),
+                    booleanArg: () => ({ onInitialize: () => ({ execute: () => ({ examples: () => ({ 
+                      build: () => ({ id: 'mock', name: 'Mock Tool', description: 'Mock', execute: () => {} })
+                    }) }) }) }),
+                    onInitialize: () => ({ execute: () => ({ examples: () => ({ 
+                      build: () => ({ id: 'mock', name: 'Mock Tool', description: 'Mock', execute: () => {} })
+                    }) }) }),
+                    execute: () => ({ examples: () => ({ 
+                      build: () => ({ id: 'mock', name: 'Mock Tool', description: 'Mock', execute: () => {} })
+                    }) }),
+                    examples: () => ({ 
+                      build: () => ({ id: 'mock', name: 'Mock Tool', description: 'Mock', execute: () => {} })
+                    }),
+                    build: () => ({ id: 'mock', name: 'Mock Tool', description: 'Mock', execute: () => {} })
+                  }) }) }) }) }) })
+                }),
+                ToolCategory: { System: 'System' },
+                ToolCapability: { SystemExecute: 'SystemExecute', UserConfirmation: 'UserConfirmation' }
+              };
+            }
+            return originalRequire.apply(this, arguments);
+          };
           
           try {
             // Load the built tool
