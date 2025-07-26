@@ -1,0 +1,9 @@
+id: ziggler/create-todo-list
+name: create-todo-list
+description: A Clanker tool for creating and managing todo lists to help track tasks and planning. This tool allows you to create a structured todo list with priorities and statuses for better task management.
+version: c18a008
+publisher: ziggle-dev
+organization: ziggler
+repository: https://github.com/ziggle-dev/clanker-create-todo-list
+commit: c18a008
+date: 2025-07-26
