@@ -436,36 +436,41 @@ jobs:
       - name: Create Pull Request
         if: success()
         id: create-pr
-        uses: peter-evans/create-pull-request@v6
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          commit-message: "feat: add tool ${{ steps.parse-issue.outputs.organization }}/${{ steps.parse-issue.outputs.tool_name }}@${{ steps.clone-tool.outputs.version }}"
-          branch: ${{ steps.integration.outputs.branch }}
-          delete-branch: false
-          base: main
-          title: '🤖 Add tool: ${{ steps.parse-issue.outputs.organization }}/${{ steps.parse-issue.outputs.tool_name }}@${{ steps.clone-tool.outputs.version }}'
-          body: |
-            ## Automated Tool Integration
-            
-            This PR was automatically generated from issue #${{ github.event.issue.number }}.
-            
-            ### Tool Information
-            - **Name**: `${{ steps.parse-issue.outputs.organization }}/${{ steps.parse-issue.outputs.tool_name }}`
-            - **Version**: `${{ steps.clone-tool.outputs.version }}`
-            - **Publisher**: @${{ steps.parse-issue.outputs.publisher }}
-            - **Repository**: ${{ steps.parse-issue.outputs.repo_url }}
-            
-            ### Pipeline Status
-            - ✅ Manifest parsed successfully
-            - ✅ Repository cloned
-            - ✅ Tool built successfully
-            - ✅ Format validated
-            - ${{ steps.security.outputs.security_status == 'pass' && '✅' || '⚠️' }} Security scan
-            
-            Closes #${{ github.event.issue.number }}
-          labels: |
-            tool-submission
-            automated
+        run: |
+          echo "🔄 Creating pull request..."
+          
+          # Create PR using GitHub CLI
+          PR_URL=$(gh pr create \
+            --base main \
+            --head "${{ steps.integration.outputs.branch }}" \
+            --title "🤖 Add tool: ${{ steps.parse-issue.outputs.organization }}/${{ steps.parse-issue.outputs.tool_name }}@${{ steps.clone-tool.outputs.version }}" \
+            --body "## Automated Tool Integration
+
+This PR was automatically generated from issue #${{ github.event.issue.number }}.
+
+### Tool Information
+- **Name**: \`${{ steps.parse-issue.outputs.organization }}/${{ steps.parse-issue.outputs.tool_name }}\`
+- **Version**: \`${{ steps.clone-tool.outputs.version }}\`
+- **Publisher**: @${{ steps.parse-issue.outputs.publisher }}
+- **Repository**: ${{ steps.parse-issue.outputs.repo_url }}
+
+### Pipeline Status
+- ✅ Manifest parsed successfully
+- ✅ Repository cloned
+- ✅ Tool built successfully
+- ✅ Format validated
+- ${{ steps.security.outputs.security_status == 'pass' && '✅' || '⚠️' }} Security scan
+
+Closes #${{ github.event.issue.number }}" \
+            --label "tool-submission" \
+            --label "automated")
+          
+          # Extract PR number from URL
+          PR_NUMBER=$(echo "$PR_URL" | grep -oE '[0-9]+$')
+          echo "pull-request-number=$PR_NUMBER" >> $GITHUB_OUTPUT
+          echo "pull-request-url=$PR_URL" >> $GITHUB_OUTPUT
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       
       # Phase 10: Post Results
       - name: Post Results Comment
