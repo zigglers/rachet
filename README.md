@@ -26,8 +26,9 @@ clanker --enable-experimental
 # Use our tool scaffold
 npx create-clanker-tool
 
-# Or start from template
-cp -r templates/tool-template submissions/my-org/my-tool
+# Or use our GitHub template
+# Visit: https://github.com/ziggle-dev/clanker-tool
+# Click "Use this template" to create your tool repository
 ```
 
 ## 📝 Submitting a Tool

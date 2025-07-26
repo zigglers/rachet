@@ -20,12 +20,12 @@ cd clanker-tools
 
 ### 2. Create Your Tool
 
-Use our template as a starting point:
+Use our GitHub template as a starting point:
 
-```bash
-cp -r templates/tool-template submissions/your-org/your-tool
-cd submissions/your-org/your-tool
-```
+1. Visit https://github.com/ziggle-dev/clanker-tool
+2. Click "Use this template" to create your repository
+3. Clone your new repository and develop your tool
+4. When ready, copy your tool to `submissions/your-org/your-tool/` in this repository
 
 ### 3. Develop Your Tool
 
