@@ -446,12 +446,8 @@ jobs:
             SECURITY_ICON="⚠️"
           fi
           
-          # Create PR using GitHub CLI
-          PR_URL=$(gh pr create \
-            --base main \
-            --head "${{ steps.integration.outputs.branch }}" \
-            --title "🤖 Add tool: ${{ steps.parse-issue.outputs.organization }}/${{ steps.parse-issue.outputs.tool_name }}@${{ steps.clone-tool.outputs.version }}" \
-            --body "## Automated Tool Integration
+          # Create PR body
+          PR_BODY="## Automated Tool Integration
 
 This PR was automatically generated from issue #${{ github.event.issue.number }}.
 
@@ -468,7 +464,14 @@ This PR was automatically generated from issue #${{ github.event.issue.number }}
 - ✅ Format validated
 - ${SECURITY_ICON} Security scan
 
-Closes #${{ github.event.issue.number }}" \
+Closes #${{ github.event.issue.number }}"
+          
+          # Create PR using GitHub CLI
+          PR_URL=$(gh pr create \
+            --base main \
+            --head "${{ steps.integration.outputs.branch }}" \
+            --title "🤖 Add tool: ${{ steps.parse-issue.outputs.organization }}/${{ steps.parse-issue.outputs.tool_name }}@${{ steps.clone-tool.outputs.version }}" \
+            --body "$PR_BODY" \
             --label "tool-submission" \
             --label "automated")
           
