@@ -456,8 +456,8 @@ jobs:
 This PR was automatically generated from issue #${{ github.event.issue.number }}.
 
 ### Tool Information
-- **Name**: \`${{ steps.parse-issue.outputs.organization }}/${{ steps.parse-issue.outputs.tool_name }}\`
-- **Version**: \`${{ steps.clone-tool.outputs.version }}\`
+- **Name**: ${{ steps.parse-issue.outputs.organization }}/${{ steps.parse-issue.outputs.tool_name }}
+- **Version**: ${{ steps.clone-tool.outputs.version }}
 - **Publisher**: @${{ steps.parse-issue.outputs.publisher }}
 - **Repository**: ${{ steps.parse-issue.outputs.repo_url }}
 
