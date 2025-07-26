@@ -257,14 +257,14 @@ jobs:
         run: |
           echo "🔍 Validating tool format..."
           
-          # Create validation script
-          cat > validate-tool.mjs << 'EOF'
+          # Create validation script in build-temp
+          cat > build-temp/validate-tool.mjs << 'EOF'
           import fs from 'fs';
           
           async function validate() {
             try {
               // Load the built tool using dynamic import
-              const tool = await import('./build-output/index.js');
+              const tool = await import('../build-output/index.js');
               
               // Check if it exports something
               const toolDef = tool.default || tool;
@@ -312,7 +312,8 @@ jobs:
           validate();
           EOF
           
-          node validate-tool.mjs
+          # Run validation from build-temp directory where dependencies are installed
+          cd build-temp && node validate-tool.mjs
       
       # Phase 6: Create Manifest
       - name: Create Tool Manifest
@@ -423,7 +424,7 @@ jobs:
           fi
           
           # Clean up temporary files before committing
-          rm -rf build-temp node_modules package*.json build-tool.js tool-repo audit-report.json validate-tool.mjs 2>/dev/null || true
+          rm -rf build-temp build-output node_modules package*.json tool-repo audit-report.json pr-body.md 2>/dev/null || true
           
           # Commit and push only the tools directory
           git add tools/
