@@ -422,26 +422,26 @@ jobs:
           
           echo "branch=$BRANCH" >> $GITHUB_OUTPUT
       
-      # Phase 9: Create Pull Request
+      # Phase 9: Create Pull Request  
       - name: Create Pull Request
         if: success()
         id: create-pr
-        uses: actions/github-script@v7
+        uses: peter-evans/create-pull-request@v6
         with:
-          script: |
-            const pr = await github.rest.pulls.create({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              title: `🤖 Add tool: ${{ steps.parse-issue.outputs.organization }}/${{ steps.parse-issue.outputs.tool_name }}@${{ steps.clone-tool.outputs.version }}`,
-              head: '${{ steps.integration.outputs.branch }}',
-              base: 'main',
-              body: `## Automated Tool Integration
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: "feat: add tool ${{ steps.parse-issue.outputs.organization }}/${{ steps.parse-issue.outputs.tool_name }}@${{ steps.clone-tool.outputs.version }}"
+          branch: ${{ steps.integration.outputs.branch }}
+          delete-branch: false
+          base: main
+          title: '🤖 Add tool: ${{ steps.parse-issue.outputs.organization }}/${{ steps.parse-issue.outputs.tool_name }}@${{ steps.clone-tool.outputs.version }}'
+          body: |
+            ## Automated Tool Integration
             
-            This PR was automatically generated from issue #${context.issue.number}.
+            This PR was automatically generated from issue #${{ github.event.issue.number }}.
             
             ### Tool Information
-            - **Name**: \`${{ steps.parse-issue.outputs.organization }}/${{ steps.parse-issue.outputs.tool_name }}\`
-            - **Version**: \`${{ steps.clone-tool.outputs.version }}\`
+            - **Name**: `${{ steps.parse-issue.outputs.organization }}/${{ steps.parse-issue.outputs.tool_name }}`
+            - **Version**: `${{ steps.clone-tool.outputs.version }}`
             - **Publisher**: @${{ steps.parse-issue.outputs.publisher }}
             - **Repository**: ${{ steps.parse-issue.outputs.repo_url }}
             
@@ -452,11 +452,10 @@ jobs:
             - ✅ Format validated
             - ${{ steps.security.outputs.security_status == 'pass' && '✅' || '⚠️' }} Security scan
             
-            Closes #${context.issue.number}`
-            });
-            
-            core.setOutput('pr_number', pr.data.number);
-            core.setOutput('pr_url', pr.data.html_url);
+            Closes #${{ github.event.issue.number }}
+          labels: |
+            tool-submission
+            automated
       
       # Phase 10: Post Results
       - name: Post Results Comment
@@ -494,7 +493,7 @@ jobs:
               comment += `Your tool has been successfully built and integrated! `;
               comment += `A pull request has been created for review.\n\n`;
               
-              comment += `**Pull Request**: #${{ steps.create-pr.outputs.pr_number }}\n`;
+              comment += `**Pull Request**: #${{ steps.create-pr.outputs.pull-request-number }}\n`;
               comment += `**Branch**: \`${{ steps.integration.outputs.branch }}\`\n\n`;
               
               comment += `A maintainer will review your submission and merge it to the main registry. `;
