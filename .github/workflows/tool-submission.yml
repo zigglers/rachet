@@ -24,13 +24,19 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'npm'
       
       - name: Install dependencies
         run: |
-          npm init -y
-          npm install esbuild fs-extra
-          cd scripts && npm init -y && npm install esbuild fs-extra && cd ..
+          # Install in scripts directory if package.json exists
+          if [ -f scripts/package.json ]; then
+            cd scripts && npm install && cd ..
+          else
+            # Create package.json and install if missing
+            cd scripts
+            npm init -y
+            npm install esbuild fs-extra
+            cd ..
+          fi
       
       - name: Get changed files
         id: changed-files
@@ -42,16 +48,33 @@ jobs:
       - name: Extract tool information
         id: tool-info
         run: |
+          echo "Changed files:"
+          echo "${{ steps.changed-files.outputs.all_changed_files }}"
+          
           # Find the tool submission directory
           TOOL_PATH=""
           for file in ${{ steps.changed-files.outputs.all_changed_files }}; do
-            if [[ $file == submissions/* ]]; then
-              # Extract org/tool from path
+            echo "Processing file: $file"
+            if [[ $file == submissions/*/*/*/* ]]; then
+              # For files like submissions/org/tool/src/file.ts
               TOOL_DIR=$(dirname $(dirname $file))
+              echo "  Matched 4-level pattern, tool dir: $TOOL_DIR"
               if [[ -f "$TOOL_DIR/package.json" ]]; then
+                echo "  Found package.json at $TOOL_DIR"
                 TOOL_PATH=$TOOL_DIR
                 break
               fi
+            elif [[ $file == submissions/*/*/* ]]; then
+              # For files like submissions/org/tool/package.json
+              TOOL_DIR=$(dirname $file)
+              echo "  Matched 3-level pattern, tool dir: $TOOL_DIR"
+              if [[ -f "$TOOL_DIR/package.json" ]]; then
+                echo "  Found package.json at $TOOL_DIR"
+                TOOL_PATH=$TOOL_DIR
+                break
+              fi
+            else
+              echo "  No pattern match for: $file"
             fi
           done
           
@@ -128,7 +151,13 @@ jobs:
           
           # Test tool loading
           export HOME=$TEST_HOME
-          TOOLS_OUTPUT=$(npm run dev -- --list-tools 2>&1 || true)
+          # First check if the dev script exists
+          if npm run | grep -q "dev"; then
+            TOOLS_OUTPUT=$(npm run dev -- --list-tools 2>&1 || true)
+          else
+            # Try running the built version
+            TOOLS_OUTPUT=$(node dist/index.js --list-tools 2>&1 || true)
+          fi
           
           if echo "$TOOLS_OUTPUT" | grep -q "${{ steps.tool-info.outputs.tool }}"; then
             echo "✅ Tool detected in --list-tools"
@@ -262,7 +291,7 @@ jobs:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
       
       - name: Upload security results
-        uses: github/codeql-action/upload-sarif@v2
-        if: always()
+        uses: github/codeql-action/upload-sarif@v3
+        if: always() && env.SNYK_TOKEN != ''
         with:
           sarif_file: snyk.sarif
