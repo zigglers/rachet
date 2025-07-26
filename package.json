@@ -1,0 +1,20 @@
+{
+  "name": "clanker-tools",
+  "version": "1.0.0",
+  "description": "The official tool registry for [Clanker](https://github.com/ziggle-dev/clanker) - AI agents that actually do things.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@types/node": "^24.1.0",
+    "esbuild": "^0.25.8",
+    "typescript": "^5.8.3"
+  },
+  "devDependencies": {
+    "@ziggler/clanker": "^0.1.34"
+  }
+}
