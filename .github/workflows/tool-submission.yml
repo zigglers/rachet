@@ -190,7 +190,7 @@ jobs:
             await esbuild.build({
               entryPoints: [entryPoint],
               bundle: true,
-              format: 'cjs',
+              format: 'esm',
               platform: 'node',
               target: 'node16',
               outfile: path.join(outputDir, 'index.js'),
@@ -251,8 +251,8 @@ jobs:
           echo "🔍 Validating tool format..."
           
           # Create validation script
-          cat > validate-tool.js << 'EOF'
-          const fs = require('fs');
+          cat > validate-tool.mjs << 'EOF'
+          import fs from 'fs';
           
           async function validate() {
             try {
@@ -305,7 +305,7 @@ jobs:
           validate();
           EOF
           
-          node validate-tool.js
+          node validate-tool.mjs
       
       # Phase 6: Create Manifest
       - name: Create Tool Manifest
