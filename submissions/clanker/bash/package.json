@@ -1,0 +1,48 @@
+{
+  "name": "@clanker/bash",
+  "version": "1.0.0",
+  "description": "Execute shell commands with timeout and security controls",
+  "main": "src/index.ts",
+  "author": {
+    "name": "Clanker Team",
+    "email": "tools@clanker.dev",
+    "github": "ziggle-dev"
+  },
+  "repository": "https://github.com/ziggle-dev/clanker",
+  "homepage": "https://github.com/ziggle-dev/clanker",
+  "license": "MIT",
+  "clanker": {
+    "category": "System",
+    "capabilities": ["SystemExecute", "UserConfirmation"],
+    "tags": ["bash", "shell", "command", "system", "terminal", "cli"],
+    "minVersion": "0.1.33"
+  },
+  "scripts": {
+    "build": "tsc --noEmit",
+    "test": "echo \"No tests yet\"",
+    "lint": "eslint src --ext .ts,.tsx"
+  },
+  "peerDependencies": {
+    "@ziggler/clanker": "*",
+    "react": "*",
+    "ink": "*"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@types/react": "^19.0.0",
+    "typescript": "^5.0.0",
+    "eslint": "^8.0.0",
+    "@typescript-eslint/parser": "^6.0.0",
+    "@typescript-eslint/eslint-plugin": "^6.0.0"
+  },
+  "keywords": [
+    "clanker",
+    "tool",
+    "bash",
+    "shell",
+    "command",
+    "terminal",
+    "cli",
+    "system"
+  ]
+}
