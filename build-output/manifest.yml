@@ -1,9 +1,0 @@
-id: ziggler/update-todo-list
-name: update-todo-list
-description: A Clanker tool for updating existing todos in the todo list, allowing you to change status, priority, and content. Works in conjunction with the create-todo-list tool to provide complete todo management functionality.
-version: 1.0.0
-publisher: ziggle-dev
-organization: ziggler
-repository: https://github.com/ziggle-dev/clanker-update-todo-list
-commit: 60204ba
-date: 2025-07-26
