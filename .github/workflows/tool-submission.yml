@@ -1,18 +1,19 @@
 name: Tool Submission Pipeline
 
 on:
-  pull_request:
-    types: [opened, edited, synchronize]
+  issues:
+    types: [opened, edited]
 
 permissions:
   contents: write
-  pull-requests: write
   issues: write
 
 jobs:
   process-submission:
     name: Process Tool Submission
     runs-on: ubuntu-latest
+    # Only run on issues with the tool-submission label
+    if: contains(github.event.issue.labels.*.name, 'tool-submission')
     
     steps:
       # Phase 1: Setup
@@ -26,20 +27,29 @@ jobs:
         with:
           node-version: '20'
       
-      # Phase 2: Parse PR and Generate Manifest
-      - name: Parse PR Description
-        id: parse-pr
+      # Phase 2: Parse Issue and Generate Manifest
+      - name: Parse Issue Body
+        id: parse-issue
         uses: actions/github-script@v7
         with:
           script: |
-            const pr = context.payload.pull_request;
-            const body = pr.body || '';
+            const issue = context.payload.issue;
+            const body = issue.body || '';
             
-            // Parse required fields
-            const repoMatch = body.match(/\*\*Repository URL\*\*.*?:\s*(?:<!--.*?-->)?\s*(https?:\/\/[^\s]+)/);
-            const descMatch = body.match(/\*\*Description\*\*.*?:\s*(?:<!--.*?-->)?\s*([^\n]+)/);
+            console.log('Parsing issue body:', body);
             
-            if (!repoMatch || !descMatch) {
+            // Parse fields from issue template
+            const parseField = (fieldName) => {
+              const regex = new RegExp(`### ${fieldName}\\s*\\n\\n(.+?)(?=\\n\\n###|\\n\\n##|$)`, 's');
+              const match = body.match(regex);
+              return match ? match[1].trim() : '';
+            };
+            
+            // Extract required fields
+            const repoUrl = parseField('Repository URL');
+            const description = parseField('Description');
+            
+            if (!repoUrl || !description) {
               core.setFailed('Missing required fields: Repository URL and Description');
               
               // Post comment about missing fields
@@ -47,20 +57,17 @@ jobs:
                 issue_number: context.issue.number,
                 owner: context.repo.owner,
                 repo: context.repo.repo,
-                body: `## ❌ Missing Required Information\n\nPlease edit your PR description to include:\n- **Repository URL**: The GitHub repository containing your tool\n- **Description**: A brief description of what your tool does\n\nUse the PR template as a guide.`
+                body: `## ❌ Missing Required Information\n\nPlease edit your issue to include:\n- **Repository URL**: The GitHub repository containing your tool\n- **Description**: A brief description of what your tool does\n\nUse the issue template as a guide.`
               });
               return;
             }
             
-            const repoUrl = repoMatch[1].trim();
-            const description = descMatch[1].trim();
-            
-            // Parse optional fields
-            const publisherMatch = body.match(/\*\*Publisher\*\*.*?:\s*(?:<!--.*?-->)?\s*([^\n]*)/);
-            const orgMatch = body.match(/\*\*Organization\*\*.*?:\s*(?:<!--.*?-->)?\s*([^\n]*)/);
-            const nameMatch = body.match(/\*\*Tool Name\*\*.*?:\s*(?:<!--.*?-->)?\s*([^\n]*)/);
-            const commitMatch = body.match(/\*\*Commit Hash\*\*.*?:\s*(?:<!--.*?-->)?\s*([^\n]*)/);
-            const versionMatch = body.match(/\*\*Version\*\*.*?:\s*(?:<!--.*?-->)?\s*([^\n]*)/);
+            // Extract optional fields
+            const publisher = parseField('Publisher') || issue.user.login;
+            const organization = parseField('Organization');
+            const toolName = parseField('Tool Name');
+            const commitHash = parseField('Commit Hash');
+            const version = parseField('Version');
             
             // Extract repo info
             const repoRegex = /github\.com\/([^\/]+)\/([^\/\s]+)/;
@@ -75,11 +82,8 @@ jobs:
             const repoName = repoInfo[2].replace(/\.git$/, '');
             
             // Set defaults
-            const publisher = publisherMatch?.[1]?.trim() || pr.user.login;
-            const organization = orgMatch?.[1]?.trim() || repoOrg;
-            const toolName = nameMatch?.[1]?.trim() || repoName;
-            const commitHash = commitMatch?.[1]?.trim() || '';
-            const version = versionMatch?.[1]?.trim() || '';
+            const finalOrganization = organization || repoOrg;
+            const finalToolName = toolName || repoName;
             
             // Output manifest data
             core.setOutput('repo_url', repoUrl);
@@ -87,8 +91,8 @@ jobs:
             core.setOutput('repo_name', repoName);
             core.setOutput('description', description);
             core.setOutput('publisher', publisher);
-            core.setOutput('organization', organization);
-            core.setOutput('tool_name', toolName);
+            core.setOutput('organization', finalOrganization);
+            core.setOutput('tool_name', finalToolName);
             core.setOutput('commit_hash', commitHash);
             core.setOutput('version', version);
             
@@ -96,8 +100,8 @@ jobs:
               repoUrl,
               description,
               publisher,
-              organization,
-              toolName,
+              organization: finalOrganization,
+              toolName: finalToolName,
               commitHash,
               version
             });
@@ -109,8 +113,8 @@ jobs:
         run: |
           echo "📥 Cloning tool repository..."
           
-          REPO_URL="${{ steps.parse-pr.outputs.repo_url }}"
-          COMMIT_HASH="${{ steps.parse-pr.outputs.commit_hash }}"
+          REPO_URL="${{ steps.parse-issue.outputs.repo_url }}"
+          COMMIT_HASH="${{ steps.parse-issue.outputs.commit_hash }}"
           
           # Clone the repository
           git clone "$REPO_URL" tool-repo
@@ -128,7 +132,7 @@ jobs:
           echo "commit_hash=$COMMIT_HASH" >> $GITHUB_OUTPUT
           
           # Generate version if not specified
-          VERSION="${{ steps.parse-pr.outputs.version }}"
+          VERSION="${{ steps.parse-issue.outputs.version }}"
           if [[ -z "$VERSION" ]]; then
             VERSION="$COMMIT_HASH"
           fi
@@ -287,13 +291,13 @@ jobs:
           echo "📋 Creating manifest..."
           
           cat > build-output/manifest.yml << EOF
-          id: ${{ steps.parse-pr.outputs.organization }}/${{ steps.parse-pr.outputs.tool_name }}
-          name: ${{ steps.parse-pr.outputs.tool_name }}
-          description: ${{ steps.parse-pr.outputs.description }}
+          id: ${{ steps.parse-issue.outputs.organization }}/${{ steps.parse-issue.outputs.tool_name }}
+          name: ${{ steps.parse-issue.outputs.tool_name }}
+          description: ${{ steps.parse-issue.outputs.description }}
           version: ${{ steps.clone-tool.outputs.version }}
-          publisher: ${{ steps.parse-pr.outputs.publisher }}
-          organization: ${{ steps.parse-pr.outputs.organization }}
-          repository: ${{ steps.parse-pr.outputs.repo_url }}
+          publisher: ${{ steps.parse-issue.outputs.publisher }}
+          organization: ${{ steps.parse-issue.outputs.organization }}
+          repository: ${{ steps.parse-issue.outputs.repo_url }}
           commit: ${{ steps.clone-tool.outputs.commit_hash }}
           date: $(date -u +%Y-%m-%d)
           EOF
@@ -332,38 +336,50 @@ jobs:
             echo "security_status=pass" >> $GITHUB_OUTPUT
           fi
       
-      # Phase 8: Create Staging Branch
-      - name: Create Staging Branch
+      # Phase 8: Create Integration Branch
+      - name: Create Integration Branch
         if: success()
-        id: staging
+        id: integration
         run: |
-          echo "🌿 Creating staging branch..."
+          echo "🌿 Creating integration branch..."
           
           # Configure git
           git config user.name "Clanker Bot"
           git config user.email "bot@clanker.dev"
           
           # Create branch name
-          BRANCH="${{ steps.parse-pr.outputs.publisher }}/${{ steps.parse-pr.outputs.tool_name }}@${{ steps.clone-tool.outputs.commit_hash }}"
+          BRANCH="${{ steps.parse-issue.outputs.publisher }}/${{ steps.parse-issue.outputs.tool_name }}@${{ steps.clone-tool.outputs.commit_hash }}"
           
           # Create and checkout branch
           git checkout -b "$BRANCH"
           
           # Create tool directory
-          TOOL_DIR="tools/${{ steps.parse-pr.outputs.organization }}/${{ steps.parse-pr.outputs.tool_name }}/${{ steps.clone-tool.outputs.version }}"
+          TOOL_DIR="tools/${{ steps.parse-issue.outputs.organization }}/${{ steps.parse-issue.outputs.tool_name }}/${{ steps.clone-tool.outputs.version }}"
           mkdir -p "$TOOL_DIR"
           
           # Copy build artifacts
           cp build-output/* "$TOOL_DIR/"
           
-          # Create tool metadata
-          cat > "tools/${{ steps.parse-pr.outputs.organization }}/${{ steps.parse-pr.outputs.tool_name }}/metadata.json" << EOF
+          # Create or update tool metadata
+          METADATA_FILE="tools/${{ steps.parse-issue.outputs.organization }}/${{ steps.parse-issue.outputs.tool_name }}/metadata.json"
+          
+          if [[ -f "$METADATA_FILE" ]]; then
+            # Update existing metadata
+            jq --arg version "${{ steps.clone-tool.outputs.version }}" \
+               --arg date "$(date -u +%Y-%m-%d)" \
+               --arg commit "${{ steps.clone-tool.outputs.commit_hash }}" \
+               '.versions[$version] = {"date": $date, "commit": $commit} | .latest = $version' \
+               "$METADATA_FILE" > tmp.json && mv tmp.json "$METADATA_FILE"
+          else
+            # Create new metadata
+            mkdir -p "$(dirname "$METADATA_FILE")"
+            cat > "$METADATA_FILE" << EOF
           {
-            "id": "${{ steps.parse-pr.outputs.tool_name }}",
-            "name": "${{ steps.parse-pr.outputs.tool_name }}",
-            "description": "${{ steps.parse-pr.outputs.description }}",
-            "publisher": "${{ steps.parse-pr.outputs.publisher }}",
-            "repository": "${{ steps.parse-pr.outputs.repo_url }}",
+            "id": "${{ steps.parse-issue.outputs.tool_name }}",
+            "name": "${{ steps.parse-issue.outputs.tool_name }}",
+            "description": "${{ steps.parse-issue.outputs.description }}",
+            "publisher": "${{ steps.parse-issue.outputs.publisher }}",
+            "repository": "${{ steps.parse-issue.outputs.repo_url }}",
             "versions": {
               "${{ steps.clone-tool.outputs.version }}": {
                 "date": "$(date -u +%Y-%m-%d)",
@@ -373,21 +389,58 @@ jobs:
             "latest": "${{ steps.clone-tool.outputs.version }}"
           }
           EOF
+          fi
           
           # Commit and push
           git add tools/
-          git commit -m "🤖 Add tool: ${{ steps.parse-pr.outputs.organization }}/${{ steps.parse-pr.outputs.tool_name }}@${{ steps.clone-tool.outputs.version }}"
+          git commit -m "feat: add tool ${{ steps.parse-issue.outputs.organization }}/${{ steps.parse-issue.outputs.tool_name }}@${{ steps.clone-tool.outputs.version }}"
           git push origin "$BRANCH"
           
           echo "branch=$BRANCH" >> $GITHUB_OUTPUT
       
-      # Phase 9: Post Results
+      # Phase 9: Create Pull Request
+      - name: Create Pull Request
+        if: success()
+        id: create-pr
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const pr = await github.rest.pulls.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: `🤖 Add tool: ${{ steps.parse-issue.outputs.organization }}/${{ steps.parse-issue.outputs.tool_name }}@${{ steps.clone-tool.outputs.version }}`,
+              head: '${{ steps.integration.outputs.branch }}',
+              base: 'main',
+              body: `## Automated Tool Integration
+            
+            This PR was automatically generated from issue #${context.issue.number}.
+            
+            ### Tool Information
+            - **Name**: \`${{ steps.parse-issue.outputs.organization }}/${{ steps.parse-issue.outputs.tool_name }}\`
+            - **Version**: \`${{ steps.clone-tool.outputs.version }}\`
+            - **Publisher**: @${{ steps.parse-issue.outputs.publisher }}
+            - **Repository**: ${{ steps.parse-issue.outputs.repo_url }}
+            
+            ### Pipeline Status
+            - ✅ Manifest parsed successfully
+            - ✅ Repository cloned
+            - ✅ Tool built successfully
+            - ✅ Format validated
+            - ${{ steps.security.outputs.security_status == 'pass' && '✅' || '⚠️' }} Security scan
+            
+            Closes #${context.issue.number}`
+            });
+            
+            core.setOutput('pr_number', pr.data.number);
+            core.setOutput('pr_url', pr.data.html_url);
+      
+      # Phase 10: Post Results
       - name: Post Results Comment
         if: always()
         uses: actions/github-script@v7
         with:
           script: |
-            const success = ${{ steps.staging.outcome == 'success' }};
+            const success = ${{ steps.integration.outcome == 'success' }};
             const securityStatus = '${{ steps.security.outputs.security_status }}' || 'unknown';
             
             let comment = success ? 
@@ -396,32 +449,35 @@ jobs:
             
             // Add tool info
             comment += `### 📦 Tool Information\n`;
-            comment += `- **Name**: \`${{ steps.parse-pr.outputs.organization }}/${{ steps.parse-pr.outputs.tool_name }}\`\n`;
+            comment += `- **Name**: \`${{ steps.parse-issue.outputs.organization }}/${{ steps.parse-issue.outputs.tool_name }}\`\n`;
             comment += `- **Version**: \`${{ steps.clone-tool.outputs.version }}\`\n`;
-            comment += `- **Publisher**: @${{ steps.parse-pr.outputs.publisher }}\n`;
-            comment += `- **Repository**: ${{ steps.parse-pr.outputs.repo_url }}\n\n`;
+            comment += `- **Publisher**: @${{ steps.parse-issue.outputs.publisher }}\n`;
+            comment += `- **Repository**: ${{ steps.parse-issue.outputs.repo_url }}\n\n`;
             
             // Add status for each phase
             comment += `### 📊 Pipeline Status\n`;
-            comment += `- Manifest Parsing: ${{ steps.parse-pr.outcome == 'success' ? '✅' : '❌' }}\n`;
+            comment += `- Manifest Parsing: ${{ steps.parse-issue.outcome == 'success' ? '✅' : '❌' }}\n`;
             comment += `- Repository Clone: ${{ steps.clone-tool.outcome == 'success' ? '✅' : '❌' }}\n`;
             comment += `- Build: ${{ steps.build.outcome == 'success' ? '✅' : '❌' }}\n`;
             comment += `- Format Validation: ${{ steps.validate.outcome == 'success' ? '✅' : '❌' }}\n`;
             comment += `- Security Scan: ${securityStatus === 'pass' ? '✅' : '⚠️'}\n`;
-            comment += `- Staging Branch: ${{ steps.staging.outcome == 'success' ? '✅' : '❌' }}\n\n`;
+            comment += `- Integration Branch: ${{ steps.integration.outcome == 'success' ? '✅' : '❌' }}\n`;
+            comment += `- Pull Request: ${{ steps.create-pr.outcome == 'success' ? '✅' : '❌' }}\n\n`;
             
             if (success) {
               // Success message
               comment += `### 🎉 Next Steps\n\n`;
-              comment += `Your tool has been successfully built and staged! `;
-              comment += `A maintainer will review your submission and merge it to the main registry.\n\n`;
+              comment += `Your tool has been successfully built and integrated! `;
+              comment += `A pull request has been created for review.\n\n`;
               
-              comment += `**Staging Branch**: \`${{ steps.staging.outputs.branch }}\`\n\n`;
+              comment += `**Pull Request**: #${{ steps.create-pr.outputs.pr_number }}\n`;
+              comment += `**Branch**: \`${{ steps.integration.outputs.branch }}\`\n\n`;
               
-              comment += `While waiting for review, you can test your tool:\n`;
+              comment += `A maintainer will review your submission and merge it to the main registry. `;
+              comment += `Once merged, your tool will be available for installation:\n\n`;
+              
               comment += `\`\`\`bash\n`;
-              comment += `# Install from staging branch\n`;
-              comment += `clanker install ${{ steps.parse-pr.outputs.organization }}/${{ steps.parse-pr.outputs.tool_name }}@${{ steps.staging.outputs.branch }}\n`;
+              comment += `clanker install ${{ steps.parse-issue.outputs.organization }}/${{ steps.parse-issue.outputs.tool_name }}\n`;
               comment += `\`\`\`\n\n`;
               
               if (securityStatus === 'warning') {
@@ -429,18 +485,23 @@ jobs:
                 comment += `Some security vulnerabilities were detected. While not blocking, please consider addressing them.\n\n`;
               }
               
-              comment += `Thank you @${{ steps.parse-pr.outputs.publisher }} for your contribution! 🙏\n\n`;
-              comment += `---\n`;
-              comment += `@ziggle-dev/maintainers - This PR is ready for review. `;
-              comment += `All automated checks have passed. Click "Merge" when ready to publish to the main registry.`;
+              comment += `Thank you @${{ steps.parse-issue.outputs.publisher }} for your contribution! 🙏\n\n`;
+              
+              // Close the issue
+              await github.rest.issues.update({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                state: 'closed'
+              });
               
             } else {
               // Failure message
               comment += `### ❌ Action Required\n\n`;
               
               // Specific error guidance
-              if (${{ steps.parse-pr.outcome != 'success' }}) {
-                comment += `Please edit your PR description to include the required fields.\n`;
+              if (${{ steps.parse-issue.outcome != 'success' }}) {
+                comment += `Please edit your issue to include the required fields.\n`;
               } else if (${{ steps.clone-tool.outcome != 'success' }}) {
                 comment += `Failed to clone the repository. Please check:\n`;
                 comment += `- Repository URL is correct and accessible\n`;
@@ -457,7 +518,7 @@ jobs:
                 comment += `- Follows the clanker tool format\n`;
               }
               
-              comment += `\nPlease fix the issues and push a new commit to trigger the pipeline again.`;
+              comment += `\nPlease fix the issues and edit your issue to trigger the pipeline again.`;
             }
             
             // Post comment

@@ -1,0 +1,89 @@
+name: Tool Submission
+description: Submit a new tool to the Clanker registry
+title: "[Tool Submission] "
+labels: ["tool-submission", "pending-review"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Submit Your Tool
+        
+        Thank you for contributing to the Clanker ecosystem! Please fill out the information below to submit your tool.
+        
+        The only required fields are **Repository URL** and **Description**. All other fields will use sensible defaults if left empty.
+
+  - type: input
+    id: repository_url
+    attributes:
+      label: Repository URL
+      description: The GitHub repository containing your tool
+      placeholder: https://github.com/username/tool-name
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: A brief description of what your tool does
+      placeholder: This tool helps developers...
+    validations:
+      required: true
+
+  - type: markdown
+    attributes:
+      value: |
+        ## Optional Information
+        Leave these fields blank to use automatic defaults.
+
+  - type: input
+    id: publisher
+    attributes:
+      label: Publisher
+      description: Your GitHub username (defaults to issue author)
+      placeholder: username
+
+  - type: input
+    id: organization
+    attributes:
+      label: Organization
+      description: Organization namespace (defaults to repository organization)
+      placeholder: org-name
+
+  - type: input
+    id: tool_name
+    attributes:
+      label: Tool Name
+      description: Tool identifier (defaults to repository name)
+      placeholder: tool-name
+
+  - type: input
+    id: commit_hash
+    attributes:
+      label: Commit Hash
+      description: Specific commit to use (defaults to latest main branch)
+      placeholder: abc123def
+
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      description: Semantic version or tag (defaults to short commit hash)
+      placeholder: 1.0.0
+
+  - type: checkboxes
+    id: confirmation
+    attributes:
+      label: Submission Checklist
+      description: Please confirm the following
+      options:
+        - label: My tool follows the clanker tool format (exports id, name, description, execute)
+          required: true
+        - label: I have tested my tool locally
+          required: true
+        - label: My tool has a README with usage instructions
+          required: true
+        - label: My tool does not contain malicious code
+          required: true
+        - label: I have the right to submit this code
+          required: true
