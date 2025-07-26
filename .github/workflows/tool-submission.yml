@@ -145,8 +145,8 @@ jobs:
         if: success()
         run: |
           # Create a temporary build directory
-          mkdir -p .build-temp
-          cd .build-temp
+          mkdir -p build-temp
+          cd build-temp
           
           # Install build dependencies
           npm init -y
@@ -158,7 +158,7 @@ jobs:
           cd ..
           
           # Create build script
-          cat > .build-temp/build-tool.js << 'EOF'
+          cat > build-temp/build-tool.js << 'EOF'
           const esbuild = require('esbuild');
           const fs = require('fs');
           const path = require('path');
@@ -239,7 +239,7 @@ jobs:
           mkdir -p build-output
           
           # Run build from temp directory
-          cd .build-temp && node build-tool.js && cd ..
+          cd build-temp && node build-tool.js && cd ..
           
           # Check if build succeeded
           if [[ ! -f "build-output/index.js" ]]; then
@@ -423,7 +423,7 @@ jobs:
           fi
           
           # Clean up temporary files before committing
-          rm -rf .build-temp node_modules package*.json build-tool.js tool-repo audit-report.json validate-tool.mjs 2>/dev/null || true
+          rm -rf build-temp node_modules package*.json build-tool.js tool-repo audit-report.json validate-tool.mjs 2>/dev/null || true
           
           # Commit and push only the tools directory
           git add tools/

@@ -1,6 +1,6 @@
 # Node modules
 node_modules/
-.build-temp/
+build-temp/
 
 # Build outputs
 build-output/
