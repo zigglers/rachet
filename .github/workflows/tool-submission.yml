@@ -122,7 +122,7 @@ jobs:
           cd tool-repo
           
           # Use specific commit or latest main
-          if [[ -n "$COMMIT_HASH" ]]; then
+          if [[ -n "$COMMIT_HASH" && "$COMMIT_HASH" != "_No response_" ]]; then
             echo "Checking out commit: $COMMIT_HASH"
             git checkout "$COMMIT_HASH"
           else
@@ -134,7 +134,7 @@ jobs:
           
           # Generate version if not specified
           VERSION="${{ steps.parse-issue.outputs.version }}"
-          if [[ -z "$VERSION" ]]; then
+          if [[ -z "$VERSION" || "$VERSION" == "_No response_" ]]; then
             VERSION="$COMMIT_HASH"
           fi
           
