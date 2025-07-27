@@ -1,0 +1,9 @@
+id: ziggle-dev/bash
+name: bash
+description: Execute bash commands within the Clanker system with proper error handling and directory management
+version: 1.0.0
+publisher: ziggle-dev
+organization: ziggle-dev
+repository: https://github.com/ziggle-dev/clanker-bash-tool
+commit: 2306b75
+date: 2025-07-27
