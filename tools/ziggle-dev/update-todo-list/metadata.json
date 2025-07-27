@@ -1,0 +1,14 @@
+{
+  "id": "update-todo-list",
+  "name": "update-todo-list",
+  "description": "Update existing todo items with new status, priority, or content",
+  "publisher": "ziggle-dev",
+  "repository": "https://github.com/ziggle-dev/clanker-update-todo-list",
+  "versions": {
+    "1.0.0": {
+      "date": "2025-07-27",
+      "commit": "60204ba"
+    }
+  },
+  "latest": "1.0.0"
+}
