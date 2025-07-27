@@ -1,0 +1,9 @@
+id: ziggle-dev/update-todo-list
+name: update-todo-list
+description: Update existing todo items with new status, priority, or content
+version: 1.0.0
+publisher: ziggle-dev
+organization: ziggle-dev
+repository: https://github.com/ziggle-dev/clanker-update-todo-list
+commit: 60204ba
+date: 2025-07-27
