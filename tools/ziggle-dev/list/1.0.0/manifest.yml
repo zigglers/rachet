@@ -1,0 +1,9 @@
+id: ziggle-dev/list
+name: list
+description: List directory contents tool for Clanker CLI
+version: 1.0.0
+publisher: ziggle-dev
+organization: ziggle-dev
+repository: https://github.com/ziggle-dev/clanker-list-tool
+commit: 0929437
+date: 2025-07-27

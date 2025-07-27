@@ -1,0 +1,14 @@
+{
+  "id": "list",
+  "name": "list",
+  "description": "List directory contents tool for Clanker CLI",
+  "publisher": "ziggle-dev",
+  "repository": "https://github.com/ziggle-dev/clanker-list-tool",
+  "versions": {
+    "1.0.0": {
+      "date": "2025-07-27",
+      "commit": "0929437"
+    }
+  },
+  "latest": "1.0.0"
+}
