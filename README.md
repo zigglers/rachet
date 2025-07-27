@@ -1,4 +1,4 @@
-# Clanker Tools Registry
+# Rachet Registry
 
 The official tool registry for [Clanker](https://github.com/ziggle-dev/clanker) - AI agents that actually do things.
 
@@ -24,11 +24,11 @@ clanker --enable-experimental
 
 ```bash
 # Option 1: Use the GitHub template (Recommended)
-# Visit: https://github.com/ziggle-dev/clanker-tool
+# Visit: https://github.com/zigglers/rachet-tool
 # Click "Use this template" to create your tool repository
 
 # Option 2: Use our tool scaffold
-npx create-clanker-tool
+npx create-rachet-tool
 ```
 
 ## 📝 Submitting a Tool
@@ -36,12 +36,12 @@ npx create-clanker-tool
 ### Automated Process (Recommended)
 
 1. **Create your tool repository**
-   - Use the [clanker-tool template](https://github.com/ziggle-dev/clanker-tool)
+   - Use the [rachet-tool template](https://github.com/zigglers/rachet-tool)
    - Click "Use this template" to create your repository
    - Implement your tool following the template structure
 
 2. **Submit via GitHub Issue**
-   - Go to [Issues](https://github.com/ziggle-dev/clanker-tools/issues/new/choose)
+   - Go to [Issues](https://github.com/zigglers/rachet/issues/new/choose)
    - Select "Tool Submission" template
    - Fill in:
      - Repository URL
@@ -66,7 +66,7 @@ npx create-clanker-tool
 
 ```markdown
 ### Repository URL
-https://github.com/your-org/clanker-awesome-tool
+https://github.com/your-org/rachet-awesome-tool
 
 ### Description
 A tool that does awesome things with files
