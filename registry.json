@@ -56,6 +56,24 @@
       "publisher": "ziggle-dev"
     },
     {
+      "id": "ziggle-dev/pwd",
+      "org": "ziggle-dev",
+      "name": "pwd",
+      "description": "Print Working Directory tool for Clanker CLI",
+      "latest": "1.0.0",
+      "version": "1.0.0",
+      "author": "ziggle-dev",
+      "repository": "https://github.com/ziggle-dev/clanker-pwd-tool",
+      "homepage": "https://github.com/ziggle-dev/clanker-pwd-tool",
+      "keywords": [],
+      "created": "2025-07-27",
+      "updated": "2025-07-27",
+      "versions": [
+        "1.0.0"
+      ],
+      "publisher": "ziggle-dev"
+    },
+    {
       "id": "ziggle-dev/update-todo-list",
       "org": "ziggle-dev",
       "name": "update-todo-list",
@@ -74,6 +92,6 @@
       "publisher": "ziggle-dev"
     }
   ],
-  "updated": "2025-07-27T01:00:59.492Z",
-  "totalTools": 4
+  "updated": "2025-07-27T01:02:11.927Z",
+  "totalTools": 5
 }
