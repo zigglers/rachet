@@ -23,44 +23,69 @@ clanker --enable-experimental
 ### Creating Tools
 
 ```bash
-# Use our tool scaffold
-npx create-clanker-tool
-
-# Or use our GitHub template
+# Option 1: Use the GitHub template (Recommended)
 # Visit: https://github.com/ziggle-dev/clanker-tool
 # Click "Use this template" to create your tool repository
+
+# Option 2: Use our tool scaffold
+npx create-clanker-tool
 ```
 
 ## 📝 Submitting a Tool
 
-1. **Fork this repository**
+### Automated Process (Recommended)
 
-2. **Create your tool** in `submissions/your-org/tool-name/`
-   ```
-   submissions/
-   └── your-org/
-       └── tool-name/
-           ├── package.json
-           ├── src/
-           │   └── index.ts
-           ├── README.md
-           └── examples/
-   ```
+1. **Create your tool repository**
+   - Use the [clanker-tool template](https://github.com/ziggle-dev/clanker-tool)
+   - Click "Use this template" to create your repository
+   - Implement your tool following the template structure
 
-3. **Submit a Pull Request**
-   - Our CI/CD will automatically:
-     - Validate your tool structure
-     - Build and bundle your tool
-     - Run integration tests
-     - Create a staging branch for testing
+2. **Submit via GitHub Issue**
+   - Go to [Issues](https://github.com/ziggle-dev/clanker-tools/issues/new/choose)
+   - Select "Tool Submission" template
+   - Fill in:
+     - Repository URL
+     - Description
+     - Tool name (optional, defaults to repo name)
+     - Version (optional, defaults to commit hash)
 
-4. **Test your tool** (while PR is open)
-   ```bash
-   clanker --enable-experimental
-   clanker --install your-org/tool-name@pr-123
-   ```
+3. **Automated Pipeline**
+   - Our bot automatically:
+     - Clones your repository
+     - Builds and bundles your tool
+     - Validates the format
+     - Runs security scans
+     - Creates a PR with your tool
 
-5. **Merge** to publish to the main registry
+4. **Review & Approval**
+   - A maintainer reviews the auto-generated PR
+   - Once approved and merged, your tool is live!
+   - The registry.json updates automatically
+
+### Example Submission
+
+```markdown
+### Repository URL
+https://github.com/your-org/clanker-awesome-tool
+
+### Description
+A tool that does awesome things with files
+
+### Tool Name
+awesome-tool
+
+### Version
+1.0.0
+```
+
+## 🤖 Automated Registry Updates
+
+The registry.json file is automatically maintained by our CI/CD pipeline:
+
+- ✅ Updates automatically when tool PRs are merged
+- ✅ No manual intervention needed
+- ✅ Ensures registry is always in sync with published tools
+- ✅ Includes all tool metadata and versions
 
 ## 📦 Tool Structure
 
@@ -159,25 +184,35 @@ export default createTool()
 - Tools run with limited permissions
 - Report security issues to security@ziggle.dev
 
-## 🧪 Testing Tools
+## 🧪 Testing Your Tool
 
 ### Before Submission
 ```bash
-# Build your tool
-cd submissions/your-org/tool-name
+# In your tool repository
 npm install
 npm run build
+npm test
 
-# Test locally
-cp dist/index.js ~/.clanker/tools/your-org/tool-name/1.0.0/
-clanker --list-tools
+# Test with clanker locally
+npm link
+clanker your-tool-name --help
 ```
 
-### During PR Review
-- Automated tests run on every push
-- Integration tests with latest clanker
-- Security scanning
-- You can test the staging build
+### After Submission
+- Watch the issue for automated progress updates
+- Check the auto-generated PR for any issues
+- The bot will comment with:
+  - ✅ Build status
+  - ✅ Validation results
+  - ✅ Security scan results
+  - 🔗 Link to the PR
+
+### Once Merged
+```bash
+# Your tool is immediately available
+clanker install your-org/tool-name
+clanker tool-name --help
+```
 
 ## 📋 Tool Guidelines
 
