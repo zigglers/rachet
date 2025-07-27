@@ -213,6 +213,7 @@ jobs:
               external: [
                 'react',
                 'ink',
+                '@ziggler/clanker',
                 'child_process',
                 'fs',
                 'path',
@@ -265,6 +266,9 @@ jobs:
         run: |
           echo "🔍 Validating tool format..."
           
+          # Copy built file to build-temp for validation with dependencies
+          cp build-output/index.js build-temp/
+          
           # Create validation script in build-temp
           cat > build-temp/validate-tool.mjs << 'EOF'
           import fs from 'fs';
@@ -272,7 +276,7 @@ jobs:
           async function validate() {
             try {
               // Load the built tool using dynamic import
-              const tool = await import('../build-output/index.js');
+              const tool = await import('./index.js');
               
               // Check if it exports something
               const toolDef = tool.default || tool;
