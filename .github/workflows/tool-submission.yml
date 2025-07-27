@@ -64,11 +64,20 @@ jobs:
             }
             
             // Extract optional fields
-            const publisher = parseField('Publisher') || issue.user.login;
-            const organization = parseField('Organization');
-            const toolName = parseField('Tool Name');
-            const commitHash = parseField('Commit Hash');
-            const version = parseField('Version');
+            const publisherField = parseField('Publisher');
+            const publisher = (publisherField && publisherField !== '_No response_') ? publisherField : issue.user.login;
+            
+            const organizationField = parseField('Organization');
+            const organization = (organizationField && organizationField !== '_No response_') ? organizationField : null;
+            
+            const toolNameField = parseField('Tool Name');
+            const toolName = (toolNameField && toolNameField !== '_No response_') ? toolNameField : null;
+            
+            const commitHashField = parseField('Commit Hash');
+            const commitHash = (commitHashField && commitHashField !== '_No response_') ? commitHashField : null;
+            
+            const versionField = parseField('Version');
+            const version = (versionField && versionField !== '_No response_') ? versionField : null;
             
             // Extract repo info
             const repoRegex = /github\.com\/([^\/]+)\/([^\/\s]+)/;
@@ -204,7 +213,6 @@ jobs:
               external: [
                 'react',
                 'ink',
-                '@ziggler/clanker',
                 'child_process',
                 'fs',
                 'path',
