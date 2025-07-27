@@ -1,0 +1,14 @@
+{
+  "id": "create-todo-list",
+  "name": "create-todo-list",
+  "description": "Create and manage todo lists with priority levels and status tracking",
+  "publisher": "ziggle-dev",
+  "repository": "https://github.com/ziggle-dev/clanker-create-todo-list",
+  "versions": {
+    "1.0.0": {
+      "date": "2025-07-27",
+      "commit": "c18a008"
+    }
+  },
+  "latest": "1.0.0"
+}
