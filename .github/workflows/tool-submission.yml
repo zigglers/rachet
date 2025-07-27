@@ -3,6 +3,11 @@ name: Tool Submission Pipeline
 on:
   issues:
     types: [opened, edited]
+  push:
+    branches:
+      - main
+    paths:
+      - 'tools/**'
 
 permissions:
   contents: write
@@ -594,3 +599,39 @@ jobs:
               repo: context.repo.repo,
               body: comment
             });
+  
+  # Job to update registry when tools are added
+  update-registry:
+    name: Update Registry Index
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      
+      - name: Generate Registry
+        run: |
+          echo "📋 Generating registry index..."
+          node scripts/generate-registry.js
+      
+      - name: Commit Registry Updates
+        run: |
+          git config user.name "Clanker Bot"
+          git config user.email "bot@clanker.dev"
+          
+          # Check if registry.json changed
+          if git diff --quiet registry.json; then
+            echo "No changes to registry"
+          else
+            git add registry.json
+            git commit -m "chore: update registry index [skip ci]"
+            git push
+          fi

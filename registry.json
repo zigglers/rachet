@@ -1,0 +1,61 @@
+{
+  "version": "1.0.0",
+  "tools": [
+    {
+      "id": "ziggle-dev/bash",
+      "org": "ziggle-dev",
+      "name": "bash",
+      "description": "Execute bash commands within the Clanker system with proper error handling and directory management",
+      "latest": "1.0.0",
+      "version": "1.0.0",
+      "author": "ziggle-dev",
+      "repository": "https://github.com/ziggle-dev/clanker-bash-tool",
+      "homepage": "https://github.com/ziggle-dev/clanker-bash-tool",
+      "keywords": [],
+      "created": "2025-07-27",
+      "updated": "2025-07-27",
+      "versions": [
+        "1.0.0"
+      ],
+      "publisher": "ziggle-dev"
+    },
+    {
+      "id": "ziggle-dev/create-todo-list",
+      "org": "ziggle-dev",
+      "name": "create-todo-list",
+      "description": "Create and manage todo lists with priority levels and status tracking",
+      "latest": "1.0.0",
+      "version": "1.0.0",
+      "author": "ziggle-dev",
+      "repository": "https://github.com/ziggle-dev/clanker-create-todo-list",
+      "homepage": "https://github.com/ziggle-dev/clanker-create-todo-list",
+      "keywords": [],
+      "created": "2025-07-27",
+      "updated": "2025-07-27",
+      "versions": [
+        "1.0.0"
+      ],
+      "publisher": "ziggle-dev"
+    },
+    {
+      "id": "ziggle-dev/update-todo-list",
+      "org": "ziggle-dev",
+      "name": "update-todo-list",
+      "description": "Update existing todo items with new status, priority, or content",
+      "latest": "1.0.0",
+      "version": "1.0.0",
+      "author": "ziggle-dev",
+      "repository": "https://github.com/ziggle-dev/clanker-update-todo-list",
+      "homepage": "https://github.com/ziggle-dev/clanker-update-todo-list",
+      "keywords": [],
+      "created": "2025-07-27",
+      "updated": "2025-07-27",
+      "versions": [
+        "1.0.0"
+      ],
+      "publisher": "ziggle-dev"
+    }
+  ],
+  "updated": "2025-07-27T00:19:39.189Z",
+  "totalTools": 3
+}
