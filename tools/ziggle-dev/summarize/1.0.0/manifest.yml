@@ -1,0 +1,9 @@
+id: ziggle-dev/summarize
+name: summarize
+description: Intelligently summarize text content into concise, structured markdown format with numbered lists, key points, and hierarchical organization
+version: 1.0.0
+publisher: ziggle-dev
+organization: ziggle-dev
+repository: https://github.com/ziggle-dev/clanker-summarize-tool
+commit: e294cf4
+date: 2025-07-27
