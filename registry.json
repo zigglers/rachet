@@ -23,7 +23,7 @@
       "id": "ziggle-dev/create-todo-list",
       "org": "ziggle-dev",
       "name": "create-todo-list",
-      "description": "Create a new todo list for planning and tracking tasks with shared state persistence",
+      "description": "Create and manage todo lists with priority levels and status tracking",
       "latest": "1.1.0",
       "version": "1.1.0",
       "author": "ziggle-dev",
@@ -35,6 +35,24 @@
       "versions": [
         "1.0.0",
         "1.1.0"
+      ],
+      "publisher": "ziggle-dev"
+    },
+    {
+      "id": "ziggle-dev/input",
+      "org": "ziggle-dev",
+      "name": "input",
+      "description": "Platform-specific input dialog for getting user input with support for password masking, default values, and native dialogs on macOS, Windows, and Linux",
+      "latest": "1.0.0",
+      "version": "1.0.0",
+      "author": "ziggle-dev",
+      "repository": "https://github.com/ziggle-dev/clanker-input",
+      "homepage": "https://github.com/ziggle-dev/clanker-input",
+      "keywords": [],
+      "created": "2025-07-27",
+      "updated": "2025-07-27",
+      "versions": [
+        "1.0.0"
       ],
       "publisher": "ziggle-dev"
     },
@@ -75,10 +93,28 @@
       "publisher": "ziggle-dev"
     },
     {
+      "id": "ziggle-dev/summarize",
+      "org": "ziggle-dev",
+      "name": "summarize",
+      "description": "Intelligently summarize text content into concise, structured markdown format with numbered lists, key points, and hierarchical organization",
+      "latest": "1.0.0",
+      "version": "1.0.0",
+      "author": "ziggle-dev",
+      "repository": "https://github.com/ziggle-dev/clanker-summarize-tool",
+      "homepage": "https://github.com/ziggle-dev/clanker-summarize-tool",
+      "keywords": [],
+      "created": "2025-07-27",
+      "updated": "2025-07-27",
+      "versions": [
+        "1.0.0"
+      ],
+      "publisher": "ziggle-dev"
+    },
+    {
       "id": "ziggle-dev/update-todo-list",
       "org": "ziggle-dev",
       "name": "update-todo-list",
-      "description": "Update existing todo items with new status, priority, or content using shared state persistence",
+      "description": "Update existing todo items with new status, priority, or content",
       "latest": "1.1.0",
       "version": "1.1.0",
       "author": "ziggle-dev",
@@ -94,6 +130,6 @@
       "publisher": "ziggle-dev"
     }
   ],
-  "updated": "2025-07-27T03:00:00.000Z",
-  "totalTools": 5
+  "updated": "2025-07-27T17:22:54.730Z",
+  "totalTools": 7
 }
