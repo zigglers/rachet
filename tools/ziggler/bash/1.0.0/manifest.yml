@@ -1,9 +1,0 @@
-id: ziggler/bash
-name: bash
-description: Execute bash commands with user confirmation
-version: 1.0.0
-publisher: ziggle-dev
-organization: ziggler
-repository: https://github.com/ziggle-dev/clanker-bash-tool
-commit: 2306b75
-date: 2025-07-26
