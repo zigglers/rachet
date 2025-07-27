@@ -1,4 +1,4 @@
-# Rachet Registry
+# Rachet Registry 🛠️
 
 The official tool registry for [Clanker](https://github.com/ziggle-dev/clanker) - AI agents that actually do things.
 
