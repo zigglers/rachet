@@ -63,16 +63,17 @@
       "org": "ziggle-dev",
       "name": "input",
       "description": "Platform-specific input dialog for getting user input with support for password masking, default values, and native dialogs on macOS, Windows, and Linux",
-      "latest": "1.0.0",
-      "version": "1.0.0",
+      "latest": "1.1.0",
+      "version": "1.1.0",
       "author": "ziggle-dev",
       "repository": "https://github.com/ziggle-dev/clanker-input",
       "homepage": "https://github.com/ziggle-dev/clanker-input",
       "keywords": [],
       "created": "2025-07-27",
-      "updated": "2025-07-27",
+      "updated": "2025-07-29",
       "versions": [
-        "1.0.0"
+        "1.0.0",
+        "1.1.0"
       ],
       "publisher": "ziggle-dev"
     },
@@ -150,6 +151,6 @@
       "publisher": "ziggle-dev"
     }
   ],
-  "updated": "2025-07-29T20:55:26.528Z",
+  "updated": "2025-07-29T20:55:50.804Z",
   "totalTools": 8
 }
