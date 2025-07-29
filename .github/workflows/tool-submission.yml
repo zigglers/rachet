@@ -610,7 +610,7 @@ jobs:
       - name: Commit Registry Updates
         run: |
           git config user.name "Clanker Bot"
-          git config user.email "bot@clanker.dev"
+          git config user.email "bot@clanker.gg"
           
           # Check if registry.json changed
           if git diff --quiet registry.json; then
