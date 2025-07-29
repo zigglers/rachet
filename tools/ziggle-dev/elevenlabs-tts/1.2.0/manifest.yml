@@ -1,0 +1,9 @@
+id: ziggle-dev/elevenlabs-tts
+name: elevenlabs-tts
+description: ElevenLabs text-to-speech integration that hooks into Clanker to playback all messages with interactive model and voice selection
+version: 1.2.0
+publisher: ziggle-dev
+organization: ziggle-dev
+repository: https://github.com/ziggle-dev/clanker-elevenlabs-tts
+commit: b4afa7c
+date: 2025-07-29
