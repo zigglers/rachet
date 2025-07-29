@@ -487,18 +487,29 @@ jobs:
           EOF
           
           # Create PR using GitHub CLI
-          PR_URL=$(gh pr create \
+          # Note: When triggered by issues, we need to handle PR creation differently
+          # Try to create PR, but don't fail if it doesn't work due to permissions
+          if PR_URL=$(gh pr create \
             --base main \
             --head "${{ steps.integration.outputs.branch }}" \
             --title "🤖 Add tool: ${{ steps.parse-issue.outputs.organization }}/${{ steps.parse-issue.outputs.tool_name }}@${{ steps.clone-tool.outputs.version }}" \
             --body-file pr-body.md \
             --label "tool-submission" \
-            --label "automated")
-          
-          # Extract PR number from URL
-          PR_NUMBER=$(echo "$PR_URL" | grep -oE '[0-9]+$')
-          echo "pull-request-number=$PR_NUMBER" >> $GITHUB_OUTPUT
-          echo "pull-request-url=$PR_URL" >> $GITHUB_OUTPUT
+            --label "automated" 2>&1); then
+            
+            # Extract PR number from URL
+            PR_NUMBER=$(echo "$PR_URL" | grep -oE '[0-9]+$')
+            echo "pull-request-number=$PR_NUMBER" >> $GITHUB_OUTPUT
+            echo "pull-request-url=$PR_URL" >> $GITHUB_OUTPUT
+            echo "✅ Pull request created successfully"
+          else
+            # If PR creation fails, just note the branch
+            echo "⚠️ Could not create PR automatically (permissions issue)"
+            echo "Branch created: ${{ steps.integration.outputs.branch }}"
+            echo "A maintainer will need to create the PR manually"
+            echo "pull-request-number=" >> $GITHUB_OUTPUT
+            echo "pull-request-url=" >> $GITHUB_OUTPUT
+          fi
           
           # Clean up
           rm -f pr-body.md
@@ -539,9 +550,16 @@ jobs:
               // Success message
               comment += `### 🎉 Next Steps\n\n`;
               comment += `Your tool has been successfully built and integrated! `;
-              comment += `A pull request has been created for review.\n\n`;
               
-              comment += `**Pull Request**: #${{ steps.create-pr.outputs.pull-request-number }}\n`;
+              const prNumber = '${{ steps.create-pr.outputs.pull-request-number }}';
+              if (prNumber) {
+                comment += `A pull request has been created for review.\n\n`;
+                comment += `**Pull Request**: #${prNumber}\n`;
+              } else {
+                comment += `The integration branch has been created.\n\n`;
+                comment += `> ⚠️ **Note**: The PR could not be created automatically due to GitHub permissions. A maintainer will create the PR manually.\n\n`;
+              }
+              
               comment += `**Branch**: \`${{ steps.integration.outputs.branch }}\`\n\n`;
               
               comment += `A maintainer will review your submission and merge it to the main registry. `;
