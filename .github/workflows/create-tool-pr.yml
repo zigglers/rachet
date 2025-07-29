@@ -80,4 +80,4 @@ jobs:
           
           echo "Created PR: $PR_URL"
         env:
-          GH_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ secrets.BOT_TOKEN }}
