@@ -1,0 +1,9 @@
+id: ziggle-dev/elevenlabs-tts
+name: elevenlabs-tts
+description: ElevenLabs text-to-speech integration with real-time streaming audio playback and smart defaults
+version: 1.4.0
+publisher: ziggle-dev
+organization: ziggle-dev
+repository: https://github.com/ziggle-dev/clanker-elevenlabs-tts
+commit: 6f02325
+date: 2025-07-29
