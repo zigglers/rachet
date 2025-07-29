@@ -1,0 +1,83 @@
+name: Create Tool PR
+
+on:
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: 'Branch name'
+        required: true
+      tool_name:
+        description: 'Tool name (org/name)'
+        required: true
+      version:
+        description: 'Tool version'
+        required: true
+      publisher:
+        description: 'Publisher username'
+        required: true
+      repository:
+        description: 'Tool repository URL'
+        required: true
+      issue_number:
+        description: 'Source issue number'
+        required: true
+      security_status:
+        description: 'Security scan status'
+        default: 'pass'
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  create-pr:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.branch }}
+      
+      - name: Create Pull Request
+        run: |
+          # Determine security status icon
+          if [[ "${{ inputs.security_status }}" == "pass" ]]; then
+            SECURITY_ICON="✅"
+          else
+            SECURITY_ICON="⚠️"
+          fi
+          
+          # Create PR body
+          cat > pr-body.md << EOF
+          ## Automated Tool Integration
+          
+          This PR was automatically generated from issue #${{ inputs.issue_number }}.
+          
+          ### Tool Information
+          - **Name**: ${{ inputs.tool_name }}
+          - **Version**: ${{ inputs.version }}
+          - **Publisher**: @${{ inputs.publisher }}
+          - **Repository**: ${{ inputs.repository }}
+          
+          ### Pipeline Status
+          - ✅ Manifest parsed successfully
+          - ✅ Repository cloned
+          - ✅ Tool built successfully
+          - ✅ Format validated
+          - ${SECURITY_ICON} Security scan
+          
+          Closes #${{ inputs.issue_number }}
+          EOF
+          
+          # Create PR
+          PR_URL=$(gh pr create \
+            --base main \
+            --head "${{ inputs.branch }}" \
+            --title "🤖 Add tool: ${{ inputs.tool_name }}@${{ inputs.version }}" \
+            --body-file pr-body.md \
+            --label "tool-submission" \
+            --label "automated")
+          
+          echo "Created PR: $PR_URL"
+        env:
+          GH_TOKEN: ${{ github.token }}
