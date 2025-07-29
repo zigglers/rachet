@@ -450,71 +450,37 @@ jobs:
           
           echo "branch=$BRANCH" >> $GITHUB_OUTPUT
       
-      # Phase 9: Create Pull Request  
-      - name: Create Pull Request
+      # Phase 9: Trigger PR Creation Workflow
+      - name: Trigger PR Creation
         if: success()
         id: create-pr
-        run: |
-          echo "🔄 Creating pull request..."
-          
-          # Determine security status icon
-          if [[ "${{ steps.security.outputs.security_status }}" == "pass" ]]; then
-            SECURITY_ICON="✅"
-          else
-            SECURITY_ICON="⚠️"
-          fi
-          
-          # Create PR body using heredoc
-          cat > pr-body.md << EOF
-          ## Automated Tool Integration
-          
-          This PR was automatically generated from issue #${{ github.event.issue.number }}.
-          
-          ### Tool Information
-          - **Name**: ${{ steps.parse-issue.outputs.organization }}/${{ steps.parse-issue.outputs.tool_name }}
-          - **Version**: ${{ steps.clone-tool.outputs.version }}
-          - **Publisher**: @${{ steps.parse-issue.outputs.publisher }}
-          - **Repository**: ${{ steps.parse-issue.outputs.repo_url }}
-          
-          ### Pipeline Status
-          - ✅ Manifest parsed successfully
-          - ✅ Repository cloned
-          - ✅ Tool built successfully
-          - ✅ Format validated
-          - ${SECURITY_ICON} Security scan
-          
-          Closes #${{ github.event.issue.number }}
-          EOF
-          
-          # Create PR using GitHub CLI
-          # Note: When triggered by issues, we need to handle PR creation differently
-          # Try to create PR, but don't fail if it doesn't work due to permissions
-          if PR_URL=$(gh pr create \
-            --base main \
-            --head "${{ steps.integration.outputs.branch }}" \
-            --title "🤖 Add tool: ${{ steps.parse-issue.outputs.organization }}/${{ steps.parse-issue.outputs.tool_name }}@${{ steps.clone-tool.outputs.version }}" \
-            --body-file pr-body.md \
-            --label "tool-submission" \
-            --label "automated" 2>&1); then
-            
-            # Extract PR number from URL
-            PR_NUMBER=$(echo "$PR_URL" | grep -oE '[0-9]+$')
-            echo "pull-request-number=$PR_NUMBER" >> $GITHUB_OUTPUT
-            echo "pull-request-url=$PR_URL" >> $GITHUB_OUTPUT
-            echo "✅ Pull request created successfully"
-          else
-            # If PR creation fails, just note the branch
-            echo "⚠️ Could not create PR automatically (permissions issue)"
-            echo "Branch created: ${{ steps.integration.outputs.branch }}"
-            echo "A maintainer will need to create the PR manually"
-            echo "pull-request-number=" >> $GITHUB_OUTPUT
-            echo "pull-request-url=" >> $GITHUB_OUTPUT
-          fi
-          
-          # Clean up
-          rm -f pr-body.md
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        uses: actions/github-script@v7
+        with:
+          script: |
+            try {
+              // Trigger the PR creation workflow
+              const result = await github.rest.actions.createWorkflowDispatch({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                workflow_id: 'create-tool-pr.yml',
+                ref: 'main',
+                inputs: {
+                  branch: '${{ steps.integration.outputs.branch }}',
+                  tool_name: '${{ steps.parse-issue.outputs.organization }}/${{ steps.parse-issue.outputs.tool_name }}',
+                  version: '${{ steps.clone-tool.outputs.version }}',
+                  publisher: '${{ steps.parse-issue.outputs.publisher }}',
+                  repository: '${{ steps.parse-issue.outputs.repo_url }}',
+                  issue_number: '${{ github.event.issue.number }}',
+                  security_status: '${{ steps.security.outputs.security_status }}'
+                }
+              });
+              
+              console.log('✅ PR creation workflow triggered successfully');
+              core.setOutput('workflow_triggered', 'true');
+            } catch (error) {
+              console.log('⚠️ Could not trigger PR workflow:', error.message);
+              core.setOutput('workflow_triggered', 'false');
+            }
       
       # Phase 10: Post Results
       - name: Post Results Comment
@@ -551,13 +517,13 @@ jobs:
               comment += `### 🎉 Next Steps\n\n`;
               comment += `Your tool has been successfully built and integrated! `;
               
-              const prNumber = '${{ steps.create-pr.outputs.pull-request-number }}';
-              if (prNumber) {
-                comment += `A pull request has been created for review.\n\n`;
-                comment += `**Pull Request**: #${prNumber}\n`;
+              const workflowTriggered = '${{ steps.create-pr.outputs.workflow_triggered }}' === 'true';
+              if (workflowTriggered) {
+                comment += `A pull request workflow has been triggered.\n\n`;
+                comment += `> ℹ️ **Note**: The PR will be created in a separate workflow. Check back in a moment for the PR link.\n\n`;
               } else {
                 comment += `The integration branch has been created.\n\n`;
-                comment += `> ⚠️ **Note**: The PR could not be created automatically due to GitHub permissions. A maintainer will create the PR manually.\n\n`;
+                comment += `> ⚠️ **Note**: The PR workflow could not be triggered automatically. A maintainer will create the PR manually.\n\n`;
               }
               
               comment += `**Branch**: \`${{ steps.integration.outputs.branch }}\`\n\n`;
