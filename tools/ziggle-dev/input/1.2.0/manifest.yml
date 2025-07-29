@@ -1,0 +1,9 @@
+id: ziggle-dev/input
+name: input
+description: Platform-specific input dialogs with support for text, password, dropdown selection, and chained questions for multiple inputs
+version: 1.2.0
+publisher: ziggle-dev
+organization: ziggle-dev
+repository: https://github.com/ziggle-dev/clanker-input
+commit: 8800840
+date: 2025-07-29
