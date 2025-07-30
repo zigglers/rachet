@@ -175,6 +175,24 @@
       "publisher": "ziggle-dev"
     },
     {
+      "id": "ziggle-dev/schedule",
+      "org": "ziggle-dev",
+      "name": "schedule",
+      "description": "Schedule Clanker commands to run after a specified delay. Provides platform-agnostic task scheduling without using system cron or bash commands.",
+      "latest": "1.0.0",
+      "version": "1.0.0",
+      "author": "zigglers",
+      "repository": "https://github.com/ziggle-dev/clanker-cron",
+      "homepage": "https://github.com/ziggle-dev/clanker-cron",
+      "keywords": [],
+      "created": "2025-07-30",
+      "updated": "2025-07-30",
+      "versions": [
+        "1.0.0"
+      ],
+      "publisher": "zigglers"
+    },
+    {
       "id": "ziggle-dev/summarize",
       "org": "ziggle-dev",
       "name": "summarize",
@@ -212,6 +230,6 @@
       "publisher": "ziggle-dev"
     }
   ],
-  "updated": "2025-07-30T06:59:24.273Z",
-  "totalTools": 11
+  "updated": "2025-07-30T07:03:41.310Z",
+  "totalTools": 12
 }
