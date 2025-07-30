@@ -1,0 +1,9 @@
+id: ziggle-dev/elevenlabs-tts
+name: elevenlabs-tts
+description: ElevenLabs text-to-speech integration with real-time streaming audio playback for Clanker messages. Now with Clanker voice as default\!
+version: 1.6.0
+publisher: ziggle-dev
+organization: ziggle-dev
+repository: https://github.com/ziggle-dev/clanker-elevenlabs-tts
+commit: 9c1bcc8
+date: 2025-07-30
