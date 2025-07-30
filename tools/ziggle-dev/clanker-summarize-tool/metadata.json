@@ -1,0 +1,14 @@
+{
+  "id": "clanker-summarize-tool",
+  "name": "clanker-summarize-tool",
+  "description": "Intelligently summarize any content with various abstraction levels, modes, and output formats",
+  "publisher": "ziggle-dev",
+  "repository": "https://github.com/ziggle-dev/clanker-summarize-tool",
+  "versions": {
+    "1.1.0": {
+      "date": "2025-07-30",
+      "commit": "3964582"
+    }
+  },
+  "latest": "1.1.0"
+}
