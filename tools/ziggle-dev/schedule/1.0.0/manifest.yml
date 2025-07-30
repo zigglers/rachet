@@ -1,0 +1,9 @@
+id: ziggle-dev/schedule
+name: schedule
+description: Schedule Clanker commands to run after a specified delay. Provides platform-agnostic task scheduling without using system cron or bash commands.
+version: 1.0.0
+publisher: zigglers
+organization: ziggle-dev
+repository: https://github.com/ziggle-dev/clanker-cron
+commit: f329b0c
+date: 2025-07-30
