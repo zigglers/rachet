@@ -61,8 +61,8 @@
       "org": "ziggle-dev",
       "name": "elevenlabs-tts",
       "description": "ElevenLabs text-to-speech integration that hooks into Clanker to playback all messages using high-quality AI voices",
-      "latest": "1.6.0",
-      "version": "1.6.0",
+      "latest": "1.6.1",
+      "version": "1.6.1",
       "author": "ziggle-dev",
       "repository": "https://github.com/ziggle-dev/clanker-elevenlabs-tts",
       "homepage": "https://github.com/ziggle-dev/clanker-elevenlabs-tts",
@@ -75,7 +75,8 @@
         "1.2.0",
         "1.4.0",
         "1.5.0",
-        "1.6.0"
+        "1.6.0",
+        "1.6.1"
       ],
       "publisher": "ziggle-dev"
     },
@@ -191,6 +192,6 @@
       "publisher": "ziggle-dev"
     }
   ],
-  "updated": "2025-07-30T03:25:06.836Z",
+  "updated": "2025-07-30T05:07:37.073Z",
   "totalTools": 10
 }
