@@ -38,6 +38,24 @@
       "publisher": "ziggle-dev"
     },
     {
+      "id": "ziggle-dev/council",
+      "org": "ziggle-dev",
+      "name": "council",
+      "description": "A Clanker tool that summons a council of personalities for audio discussions",
+      "latest": "1.0.0",
+      "version": "1.0.0",
+      "author": "ziggle-dev",
+      "repository": "https://github.com/ziggle-dev/clanker-council",
+      "homepage": "https://github.com/ziggle-dev/clanker-council",
+      "keywords": [],
+      "created": "2025-07-30",
+      "updated": "2025-07-30",
+      "versions": [
+        "1.0.0"
+      ],
+      "publisher": "ziggle-dev"
+    },
+    {
       "id": "ziggle-dev/create-todo-list",
       "org": "ziggle-dev",
       "name": "create-todo-list",
@@ -192,6 +210,6 @@
       "publisher": "ziggle-dev"
     }
   ],
-  "updated": "2025-07-30T05:07:37.073Z",
-  "totalTools": 10
+  "updated": "2025-07-30T06:02:29.220Z",
+  "totalTools": 11
 }
