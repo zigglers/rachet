@@ -1,0 +1,9 @@
+id: ziggle-dev/council
+name: council
+description: A Clanker tool that summons a council of personalities for audio discussions
+version: 1.0.0
+publisher: ziggle-dev
+organization: ziggle-dev
+repository: https://github.com/ziggle-dev/clanker-council
+commit: fca59f3
+date: 2025-07-30
