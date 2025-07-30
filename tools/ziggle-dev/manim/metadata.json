@@ -1,0 +1,14 @@
+{
+  "id": "manim",
+  "name": "manim",
+  "description": "Create beautiful mathematical animations using Manim for Clanker",
+  "publisher": "ziggle-dev",
+  "repository": "https://github.com/ziggle-dev/clanker-manim-animator",
+  "versions": {
+    "1.0.0": {
+      "date": "2025-07-30",
+      "commit": "ce7c1dc31b7a4ca4c67b96278731565285dd4b25"
+    }
+  },
+  "latest": "1.0.0"
+}
