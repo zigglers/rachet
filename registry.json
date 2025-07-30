@@ -42,8 +42,8 @@
       "org": "ziggle-dev",
       "name": "council",
       "description": "A Clanker tool that summons a council of personalities for audio discussions",
-      "latest": "1.0.1",
-      "version": "1.0.1",
+      "latest": "1.1.0",
+      "version": "1.1.0",
       "author": "ziggle-dev",
       "repository": "https://github.com/ziggle-dev/clanker-council",
       "homepage": "https://github.com/ziggle-dev/clanker-council",
@@ -52,7 +52,8 @@
       "updated": "2025-07-30",
       "versions": [
         "1.0.0",
-        "1.0.1"
+        "1.0.1",
+        "1.1.0"
       ],
       "publisher": "ziggle-dev"
     },
@@ -211,6 +212,6 @@
       "publisher": "ziggle-dev"
     }
   ],
-  "updated": "2025-07-30T06:28:56.276Z",
+  "updated": "2025-07-30T06:59:24.273Z",
   "totalTools": 11
 }
