@@ -20,6 +20,24 @@
       "publisher": "ziggle-dev"
     },
     {
+      "id": "ziggle-dev/clanker-summarize-tool",
+      "org": "ziggle-dev",
+      "name": "clanker-summarize-tool",
+      "description": "Intelligently summarize any content with various abstraction levels, modes, and output formats",
+      "latest": "1.1.0",
+      "version": "1.1.0",
+      "author": "ziggle-dev",
+      "repository": "https://github.com/ziggle-dev/clanker-summarize-tool",
+      "homepage": "https://github.com/ziggle-dev/clanker-summarize-tool",
+      "keywords": [],
+      "created": "2025-07-30",
+      "updated": "2025-07-30",
+      "versions": [
+        "1.1.0"
+      ],
+      "publisher": "ziggle-dev"
+    },
+    {
       "id": "ziggle-dev/create-todo-list",
       "org": "ziggle-dev",
       "name": "create-todo-list",
@@ -172,6 +190,6 @@
       "publisher": "ziggle-dev"
     }
   ],
-  "updated": "2025-07-30T02:32:04.058Z",
-  "totalTools": 9
+  "updated": "2025-07-30T03:10:21.847Z",
+  "totalTools": 10
 }
