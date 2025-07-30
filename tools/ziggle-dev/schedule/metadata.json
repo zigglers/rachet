@@ -1,0 +1,14 @@
+{
+  "id": "schedule",
+  "name": "schedule",
+  "description": "Schedule Clanker commands to run after a specified delay. Provides platform-agnostic task scheduling without using system cron or bash commands.",
+  "publisher": "zigglers",
+  "repository": "https://github.com/ziggle-dev/clanker-cron",
+  "versions": {
+    "1.0.0": {
+      "date": "2025-07-30",
+      "commit": "f329b0c"
+    }
+  },
+  "latest": "1.0.0"
+}
