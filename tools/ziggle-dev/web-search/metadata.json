@@ -1,0 +1,14 @@
+{
+  "id": "web-search",
+  "name": "web-search",
+  "description": "Search the web and Twitter/X using X AI's live search API with Grok. Provides real-time search results with citations and seamless integration with Clanker's API key system.",
+  "publisher": "ziggle-dev",
+  "repository": "https://github.com/ziggle-dev/clanker-web-search",
+  "versions": {
+    "2.0.0": {
+      "date": "2025-07-31",
+      "commit": "1f28c29"
+    }
+  },
+  "latest": "2.0.0"
+}
