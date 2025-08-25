@@ -1,0 +1,81 @@
+name: Label Tool Issues
+
+on:
+  pull_request:
+    types: [closed]
+    branches:
+      - main
+
+permissions:
+  issues: write
+  pull-requests: read
+
+jobs:
+  label-issue:
+    name: Label Related Issue
+    runs-on: ubuntu-latest
+    # Only run for automated tool submission PRs
+    if: |
+      github.event.pull_request.labels &&
+      contains(github.event.pull_request.labels.*.name, 'tool-submission') &&
+      contains(github.event.pull_request.labels.*.name, 'automated')
+    
+    steps:
+      - name: Extract Issue Number
+        id: extract
+        run: |
+          # Extract issue number from PR body
+          PR_BODY="${{ github.event.pull_request.body }}"
+          ISSUE_NUM=$(echo "$PR_BODY" | grep -oE 'Closes #[0-9]+' | sed 's/Closes #//')
+          
+          if [[ -z "$ISSUE_NUM" ]]; then
+            echo "No issue number found in PR body"
+            exit 0
+          fi
+          
+          echo "issue_number=$ISSUE_NUM" >> $GITHUB_OUTPUT
+          echo "Found issue #$ISSUE_NUM"
+      
+      - name: Label Issue Based on PR Status
+        if: steps.extract.outputs.issue_number
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const issueNumber = ${{ steps.extract.outputs.issue_number }};
+            const prMerged = ${{ github.event.pull_request.merged }};
+            
+            console.log(`PR was ${prMerged ? 'merged' : 'closed without merging'}`);
+            console.log(`Updating issue #${issueNumber}`);
+            
+            try {
+              // Add appropriate label based on PR status
+              const labelToAdd = prMerged ? 'tool-merged' : 'tool-blocked';
+              
+              await github.rest.issues.addLabels({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issueNumber,
+                labels: [labelToAdd]
+              });
+              
+              console.log(`✅ Added '${labelToAdd}' label to issue #${issueNumber}`);
+              
+              // Post a comment on the issue
+              const statusEmoji = prMerged ? '✅' : '❌';
+              const statusText = prMerged ? 'merged' : 'closed without merging';
+              const message = prMerged 
+                ? `🎉 Your tool submission has been **merged** and is now available in the registry!\n\nYou can install it with:\n\`\`\`bash\nclanker install <tool-name>\n\`\`\``
+                : `⚠️ Your tool submission PR was **closed without merging**.\n\nThis could be due to:\n- Issues found during review\n- Duplicate submission\n- Tool not meeting requirements\n\nPlease check the PR comments for more details.`;
+              
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issueNumber,
+                body: `## ${statusEmoji} Tool Submission Update\n\nThe pull request for this tool submission has been **${statusText}**.\n\n${message}`
+              });
+              
+            } catch (error) {
+              console.error(`Failed to update issue: ${error.message}`);
+              // Don't fail the workflow if we can't update the issue
+            }
