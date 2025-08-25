@@ -1,0 +1,9 @@
+id: ziggle-dev/voice-input
+name: voice-input
+description: Voice input tool for Clanker - Record audio and transcribe using ElevenLabs Scribe API for speech-to-text transcription
+version: 3.2.1
+publisher: ziggle-dev
+organization: ziggle-dev
+repository: https://github.com/ziggle-dev/clanker-voice-input
+commit: a686793
+date: 2025-08-25
