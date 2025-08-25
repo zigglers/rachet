@@ -207,6 +207,17 @@ jobs:
             
             console.log('Building from:', entryPoint);
             
+            // Get external dependencies from package.json if it exists
+            let externalDeps = [];
+            const packageJsonPath = path.join(toolDir, 'package.json');
+            if (fs.existsSync(packageJsonPath)) {
+              const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
+              const deps = packageJson.dependencies || {};
+              const peerDeps = packageJson.peerDependencies || {};
+              externalDeps = [...Object.keys(deps), ...Object.keys(peerDeps)];
+              console.log('Found dependencies to mark as external:', externalDeps);
+            }
+            
             // Bundle the tool
             await esbuild.build({
               entryPoints: [entryPoint],
@@ -216,9 +227,7 @@ jobs:
               target: 'node16',
               outfile: path.join(outputDir, 'index.js'),
               external: [
-                'react',
-                'ink',
-                '@ziggler/clanker',
+                // Core Node.js modules
                 'child_process',
                 'fs',
                 'path',
@@ -226,7 +235,19 @@ jobs:
                 'util',
                 'stream',
                 'events',
-                'crypto'
+                'crypto',
+                'http',
+                'https',
+                'url',
+                'querystring',
+                'buffer',
+                'process',
+                // Clanker and common UI dependencies
+                '@ziggler/clanker',
+                'react',
+                'ink',
+                // Tool-specific dependencies from package.json
+                ...externalDeps
               ],
               // Avoid top-level await issues
               supported: {
@@ -248,6 +269,14 @@ jobs:
         id: build
         run: |
           echo "🔨 Building tool..."
+          
+          # Check if tool has dependencies and install them
+          if [[ -f "tool-repo/package.json" ]]; then
+            echo "📦 Installing tool dependencies..."
+            cd tool-repo
+            npm install --production
+            cd ..
+          fi
           
           # Create output directory
           mkdir -p build-output
