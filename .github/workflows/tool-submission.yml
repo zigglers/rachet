@@ -464,8 +464,8 @@ jobs:
           TOOL_DIR="tools/${{ steps.parse-issue.outputs.organization }}/${{ steps.parse-issue.outputs.tool_name }}/${{ steps.clone-tool.outputs.version }}"
           mkdir -p "$TOOL_DIR"
           
-          # Copy build artifacts
-          cp build-output/* "$TOOL_DIR/"
+          # Copy all build artifacts including package.json
+          cp -r build-output/. "$TOOL_DIR/"
           
           # Create or update tool metadata
           METADATA_FILE="tools/${{ steps.parse-issue.outputs.organization }}/${{ steps.parse-issue.outputs.tool_name }}/metadata.json"
