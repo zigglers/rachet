@@ -498,8 +498,10 @@ jobs:
           EOF
           fi
           
-          # Clean up temporary files before committing
-          rm -rf build-temp build-output node_modules package*.json tool-repo audit-report.json pr-body.md 2>/dev/null || true
+          # Clean up temporary files before committing (but keep tool artifacts)
+          rm -rf build-temp build-output node_modules tool-repo audit-report.json pr-body.md 2>/dev/null || true
+          # Clean up root package files but not in tools directory
+          rm -f package.json package-lock.json 2>/dev/null || true
           
           # Commit and push only the tools directory
           git add tools/
