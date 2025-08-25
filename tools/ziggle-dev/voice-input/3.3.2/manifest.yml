@@ -1,0 +1,9 @@
+id: ziggle-dev/voice-input
+name: voice-input
+description: Voice recording with intelligent silence detection and TTS integration. Records audio and transcribes using ElevenLabs Scribe API. Perfect for voice-driven interactions.
+version: 3.3.2
+publisher: ziggle-dev
+organization: ziggle-dev
+repository: https://github.com/ziggle-dev/clanker-voice-input
+commit: 2463ecc
+date: 2025-08-25
