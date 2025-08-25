@@ -468,8 +468,9 @@ jobs:
           echo "Contents of build-output before copy:"
           ls -la build-output/
           
-          # Copy all build artifacts including package.json
-          cp -r build-output/. "$TOOL_DIR/"
+          # Copy all build artifacts including package.json  
+          # Use find to ensure all files are copied
+          find build-output -type f -exec cp {} "$TOOL_DIR/" \;
           
           # Debug: List tool directory contents after copy
           echo "Contents of $TOOL_DIR after copy:"
