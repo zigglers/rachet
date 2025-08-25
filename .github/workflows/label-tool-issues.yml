@@ -14,11 +14,8 @@ jobs:
   label-issue:
     name: Label Related Issue
     runs-on: ubuntu-latest
-    # Only run for automated tool submission PRs
-    if: |
-      github.event.pull_request.labels &&
-      contains(github.event.pull_request.labels.*.name, 'tool-submission') &&
-      contains(github.event.pull_request.labels.*.name, 'automated')
+    # Only run for tool submission PRs
+    if: contains(github.event.pull_request.labels.*.name, 'tool-submission')
     
     steps:
       - name: Extract Issue Number
