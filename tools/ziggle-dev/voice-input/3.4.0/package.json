@@ -1,0 +1,14 @@
+{
+  "name": "voice-input",
+  "version": "3.4.0",
+  "description": "Voice recording with intelligent silence detection and TTS integration. Records audio and transcribes using ElevenLabs Scribe API. Perfect for voice-driven interactions.",
+  "main": "index.js",
+  "dependencies": {
+  "form-data": "^4.0.0",
+  "node-fetch": "^2.7.0",
+  "node-record-lpcm16": "^1.0.1"
+},
+  "peerDependencies": {
+  "@ziggler/clanker": "*"
+}
+}
