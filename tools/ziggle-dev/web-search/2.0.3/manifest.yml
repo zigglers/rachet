@@ -1,0 +1,9 @@
+id: ziggle-dev/web-search
+name: web-search
+description: Web search tool using X AI's API for real-time web searches and Twitter/X searches
+version: 2.0.3
+publisher: ziggle-dev
+organization: ziggle-dev
+repository: https://github.com/ziggle-dev/clanker-web-search
+commit: 51f8ee2
+date: 2025-08-25

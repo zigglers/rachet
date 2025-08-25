@@ -1,0 +1,14 @@
+{
+  "name": "web-search",
+  "version": "2.0.3",
+  "description": "Web search tool using X AI's API for real-time web searches and Twitter/X searches",
+  "main": "index.js",
+  "dependencies": {
+  "@ziggler/clanker": "^0.2.1",
+  "open": "^10.0.0"
+},
+  "peerDependencies": {
+  "ink": "*",
+  "react": "*"
+}
+}
