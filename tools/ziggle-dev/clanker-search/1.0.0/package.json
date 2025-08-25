@@ -1,0 +1,15 @@
+{
+  "name": "clanker-search",
+  "version": "1.0.0",
+  "description": "A powerful search tool for Clanker that provides fast file and text searching with glob patterns and regex support, similar to ripgrep",
+  "main": "index.js",
+  "dependencies": {
+  "@ziggler/clanker": "^0.2.6",
+  "fast-glob": "^3.3.2",
+  "minimatch": "^9.0.3"
+},
+  "peerDependencies": {
+  "ink": "^5.0.0",
+  "react": "^18.0.0"
+}
+}
