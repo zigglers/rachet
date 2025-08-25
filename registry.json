@@ -193,6 +193,24 @@
       "publisher": "zigglers"
     },
     {
+      "id": "ziggle-dev/spotify-tool",
+      "org": "ziggle-dev",
+      "name": "spotify-tool",
+      "description": "Comprehensive Spotify client for Clanker CLI - control playback, manage playlists, and discover music",
+      "latest": "1.0.0",
+      "version": "1.0.0",
+      "author": "ziggle-dev",
+      "repository": "https://github.com/ziggle-dev/spotify-tool",
+      "homepage": "https://github.com/ziggle-dev/spotify-tool",
+      "keywords": [],
+      "created": "2025-08-25",
+      "updated": "2025-08-25",
+      "versions": [
+        "1.0.0"
+      ],
+      "publisher": "ziggle-dev"
+    },
+    {
       "id": "ziggle-dev/summarize",
       "org": "ziggle-dev",
       "name": "summarize",
@@ -249,6 +267,6 @@
       "publisher": "ziggle-dev"
     }
   ],
-  "updated": "2025-08-24T22:00:53.514Z",
-  "totalTools": 13
+  "updated": "2025-08-25T13:14:00.370Z",
+  "totalTools": 14
 }
