@@ -292,6 +292,29 @@ jobs:
           
           echo "✅ Build successful"
           ls -la build-output/
+          
+          # Create package.json for the tool if it has dependencies
+          if [[ -f "tool-repo/package.json" ]]; then
+            echo "📦 Creating package.json for tool dependencies..."
+            
+            # Extract dependencies from the original package.json
+            DEPS=$(cat tool-repo/package.json | jq -r '.dependencies // {}')
+            PEER_DEPS=$(cat tool-repo/package.json | jq -r '.peerDependencies // {}')
+            
+            # Create a minimal package.json for the tool
+            cat > build-output/package.json << EOF
+          {
+            "name": "${{ steps.parse-issue.outputs.tool_name }}",
+            "version": "${{ steps.clone-tool.outputs.version }}",
+            "description": "${{ steps.parse-issue.outputs.description }}",
+            "main": "index.js",
+            "dependencies": $DEPS,
+            "peerDependencies": $PEER_DEPS
+          }
+          EOF
+            
+            echo "Created package.json with dependencies"
+          fi
       
       # Phase 5: Validate Tool Format
       - name: Validate Tool Format
