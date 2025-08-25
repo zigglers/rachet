@@ -1,0 +1,14 @@
+{
+  "id": "spotify-tool",
+  "name": "spotify-tool",
+  "description": "Comprehensive Spotify client for Clanker CLI - control playback, manage playlists, and discover music",
+  "publisher": "ziggle-dev",
+  "repository": "https://github.com/ziggle-dev/spotify-tool",
+  "versions": {
+    "1.0.0": {
+      "date": "2025-08-25",
+      "commit": "7879ac3"
+    }
+  },
+  "latest": "1.0.0"
+}
