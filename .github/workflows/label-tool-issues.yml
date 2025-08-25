@@ -9,6 +9,7 @@ on:
 permissions:
   issues: write
   pull-requests: read
+  contents: write
 
 jobs:
   label-issue:
@@ -76,3 +77,16 @@ jobs:
               console.error(`Failed to update issue: ${error.message}`);
               // Don't fail the workflow if we can't update the issue
             }
+      
+      - name: Delete Branch if Not Merged
+        if: |
+          steps.extract.outputs.issue_number &&
+          github.event.pull_request.merged == false
+        run: |
+          BRANCH_NAME="${{ github.event.pull_request.head.ref }}"
+          echo "PR was closed without merging. Deleting branch: $BRANCH_NAME"
+          
+          # Delete the remote branch
+          git push origin --delete "$BRANCH_NAME" || echo "Branch may have already been deleted or doesn't exist"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
