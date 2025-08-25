@@ -7,9 +7,9 @@ build-output/
 build-tool.js
 validate-tool.mjs
 
-# Package files
-package.json
-package-lock.json
+# Package files (only at root level, not in tools/)
+/package.json
+/package-lock.json
 
 # Audit reports
 audit-report.json
