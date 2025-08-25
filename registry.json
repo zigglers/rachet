@@ -248,6 +248,24 @@
       "publisher": "ziggle-dev"
     },
     {
+      "id": "ziggle-dev/voice-input",
+      "org": "ziggle-dev",
+      "name": "voice-input",
+      "description": "Voice input tool for Clanker - Record audio and transcribe using ElevenLabs Scribe API for speech-to-text transcription",
+      "latest": "3.2.1",
+      "version": "3.2.1",
+      "author": "ziggle-dev",
+      "repository": "https://github.com/ziggle-dev/clanker-voice-input",
+      "homepage": "https://github.com/ziggle-dev/clanker-voice-input",
+      "keywords": [],
+      "created": "2025-08-25",
+      "updated": "2025-08-25",
+      "versions": [
+        "3.2.1"
+      ],
+      "publisher": "ziggle-dev"
+    },
+    {
       "id": "ziggle-dev/web-search",
       "org": "ziggle-dev",
       "name": "web-search",
@@ -267,6 +285,6 @@
       "publisher": "ziggle-dev"
     }
   ],
-  "updated": "2025-08-25T13:14:00.370Z",
-  "totalTools": 14
+  "updated": "2025-08-25T15:38:20.599Z",
+  "totalTools": 15
 }
