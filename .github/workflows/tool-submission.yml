@@ -303,6 +303,12 @@ jobs:
           # Copy built file to build-temp for validation with dependencies
           cp build-output/index.js build-temp/
           
+          # If tool has dependencies, copy node_modules to build-temp for validation
+          if [[ -d "tool-repo/node_modules" ]]; then
+            echo "📦 Copying dependencies for validation..."
+            cp -r tool-repo/node_modules build-temp/
+          fi
+          
           # Create validation script in build-temp
           cat > build-temp/validate-tool.mjs << 'EOF'
           import fs from 'fs';
