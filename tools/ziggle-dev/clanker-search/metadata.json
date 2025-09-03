@@ -1,0 +1,14 @@
+{
+  "id": "clanker-search",
+  "name": "clanker-search",
+  "description": "A powerful search tool for Clanker that provides fast file and text searching with glob patterns and regex support, similar to ripgrep",
+  "publisher": "ziggle-dev",
+  "repository": "https://github.com/ziggle-dev/clanker-search",
+  "versions": {
+    "1.0.0": {
+      "date": "2025-08-25",
+      "commit": "6920465"
+    }
+  },
+  "latest": "1.0.0"
+}
