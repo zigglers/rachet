@@ -1,0 +1,9 @@
+id: ziggle-dev/web-search
+name: web-search
+description: Advanced web search tool using X AI's Grok API with configurable search parameters and enhanced execution display for web and Twitter/X searches
+version: 2.1.1
+publisher: ziggle-dev
+organization: ziggle-dev
+repository: https://github.com/ziggle-dev/clanker-web-search
+commit: b33d640
+date: 2025-09-03
